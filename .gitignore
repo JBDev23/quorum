@@ -20,6 +20,7 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 *-firebase-adminsdk-*.json
+google-services.json
 
 # Metro
 .metro-health-check*
