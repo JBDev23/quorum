@@ -1,0 +1,1 @@
+export const FREE_TIER_PARTICIPANT_LIMIT = 15;

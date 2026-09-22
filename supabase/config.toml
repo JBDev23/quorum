@@ -1,0 +1,17 @@
+# Edge Function JWT settings
+# sync-premium: verify_jwt = true (default)
+# delete-account: verify_jwt = true (default)
+# revenuecat-webhook: must be deployed with --no-verify-jwt
+
+[functions.revenuecat-webhook]
+verify_jwt = false
+
+[functions.sync-premium]
+verify_jwt = true
+
+[functions.delete-account]
+verify_jwt = true
+
+# Called from Postgres triggers (pg_net) with x-push-secret
+[functions.dispatch-push]
+verify_jwt = false
