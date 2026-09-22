@@ -1,0 +1,98 @@
+export default {
+  expo: {
+    name: "quorum",
+    slug: "quorum",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/icon.png",
+    scheme: "quorum",
+    userInterfaceStyle: "automatic",
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.jbdev23.votingapp"
+    },
+    android: {
+      adaptiveIcon: {
+        backgroundColor: "#0a0a0a",
+        foregroundImage: "./assets/android-icon-foreground.png",
+        backgroundImage: "./assets/android-icon-background.png",
+        monochromeImage: "./assets/android-icon-monochrome.png"
+      },
+      predictiveBackGestureEnabled: false,
+      permissions: [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      package: "com.jbdev23.votingapp",
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json"
+    },
+    web: {
+      favicon: "./assets/favicon.png",
+      bundler: "metro"
+    },
+    plugins: [
+      "expo-router",
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          cameraPermission: "Permitir a quorum acceso a la cámara para escanear códigos QR."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            cmakeVersion: "3.31.6"
+          }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "Permitir a quorum acceso a tus fotos para seleccionar un avatar."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-sharing",
+      [
+        "expo-local-authentication",
+        {
+          faceIDPermission: "Permitir a quorum usar Face ID para confirmar tu voto."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/notification-icon.png",
+          color: "#0a0a0a",
+          defaultChannel: "default"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          backgroundColor: "#ffffff",
+          image: "./assets/splash-icon.png",
+          dark: {
+            image: "./assets/splash-icon-dark.png",
+            backgroundColor: "#0a0a0a"
+          },
+          imageWidth: 200
+        }
+      ]
+    ],
+    experiments: {
+      typedRoutes: true
+    },
+    extra: {
+      router: {},
+      eas: {
+        projectId: "025ab266-8f80-4a67-bab5-8c53b44a1245"
+      }
+    },
+    owner: "jbdev23"
+  }
+};
