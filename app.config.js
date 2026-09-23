@@ -9,7 +9,7 @@ export default {
     userInterfaceStyle: "automatic",
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.jbdev23.votingapp"
+      bundleIdentifier: "com.jbdev23.quorum"
     },
     android: {
       adaptiveIcon: {
@@ -25,7 +25,7 @@ export default {
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ],
-      package: "com.jbdev23.votingapp",
+      package: "com.jbdev23.quorum",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json"
     },
     web: {
