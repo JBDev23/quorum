@@ -41,14 +41,7 @@ export default {
           cameraPermission: "Permitir a quorum acceso a la cámara para escanear códigos QR."
         }
       ],
-      [
-        "expo-build-properties",
-        {
-          android: {
-            cmakeVersion: "3.31.6"
-          }
-        }
-      ],
+      "expo-build-properties",
       [
         "expo-image-picker",
         {
