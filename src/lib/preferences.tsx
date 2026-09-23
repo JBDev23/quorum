@@ -85,7 +85,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
           const parsed = JSON.parse(raw) as Partial<DevicePreferences>;
           const next: DevicePreferences = {
             hapticEnabled: parsed.hapticEnabled ?? true,
-            theme: parsed.theme ?? "dark",
+            theme: parsed.theme ?? "light",
             bioAuthEnabled: parsed.bioAuthEnabled ?? false,
           };
           setPrefs(next);

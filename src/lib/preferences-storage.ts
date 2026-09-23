@@ -10,6 +10,6 @@ export type DevicePreferences = {
 
 export const DEFAULT_DEVICE_PREFERENCES: DevicePreferences = {
   hapticEnabled: true,
-  theme: "dark",
+  theme: "light",
   bioAuthEnabled: false,
 };

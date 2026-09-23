@@ -3,18 +3,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
-function requireEnv(name: string): string {
-  const value = process.env[name]?.trim();
-  if (!value) {
-    throw new Error(
-      `Falta la variable de entorno ${name}. Copia .env.example a .env y rellena los valores (ver README).`
-    );
-  }
-  return value;
-}
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-const supabaseUrl = requireEnv("EXPO_PUBLIC_SUPABASE_URL");
-const supabaseAnonKey = requireEnv("EXPO_PUBLIC_SUPABASE_ANON_KEY");
+if (!supabaseUrl) {
+  throw new Error("Falta la variable de entorno EXPO_PUBLIC_SUPABASE_URL. Copia .env.example a .env y rellena los valores (ver README).");
+}
+if (!supabaseAnonKey) {
+  throw new Error("Falta la variable de entorno EXPO_PUBLIC_SUPABASE_ANON_KEY. Copia .env.example a .env y rellena los valores (ver README).");
+}
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
