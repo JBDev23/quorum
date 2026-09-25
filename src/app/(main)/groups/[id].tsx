@@ -25,6 +25,7 @@ import {
   Trash,
   LogOut
 } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/lib/auth";
 import { getGroupDetails, type GroupListItem } from "@/services/groups";
@@ -45,6 +46,7 @@ function goToGroupsTab() {
 export default function GroupDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const groupId = typeof id === "string" ? id : id?.[0];
+  const { t } = useTranslation();
   const { user } = useAuth();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -98,7 +100,7 @@ export default function GroupDetailScreen() {
       .catch((err) => {
         if (!cancelled) {
           setGroup(null);
-          setError(err instanceof Error ? err.message : "Grupo no encontrado");
+          setError(err instanceof Error ? err.message : t("main.groupDetail.error_not_found"));
         }
       })
       .finally(() => {
@@ -117,19 +119,19 @@ export default function GroupDetailScreen() {
   if (error || !group) {
     return (
       <View className="flex-1 bg-background justify-center items-center px-6">
-        <Stack.Screen options={{ title: "Grupo", headerShown: true }} />
+        <Stack.Screen options={{ title: t("main.groupDetail.header_group"), headerShown: true }} />
         <Text className="text-destructive text-xl font-bold mb-2">
-          No se pudo cargar
+          {t("main.groupDetail.error_load")}
         </Text>
         <Text className="text-muted-foreground text-center mb-8">
-          {error ?? "Grupo no encontrado"}
+          {error ?? t("main.groupDetail.error_not_found")}
         </Text>
         <TouchableOpacity
           onPress={goToGroupsTab}
           className="bg-muted px-6 py-3 rounded-full flex-row items-center gap-2"
         >
           <ArrowLeft color="white" size={20} />
-          <Text className="text-foreground font-semibold">Volver</Text>
+          <Text className="text-foreground font-semibold">{t("main.groupDetail.back")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -145,12 +147,12 @@ export default function GroupDetailScreen() {
   const handleLeave = () => {
     if (isOrganizer) {
       alert(
-        "Eliminar Grupo",
-        `Eres el organizador. Si eliminas "${group.name}", se borrará todo el historial de reuniones y votaciones para todos los participantes. Esta acción no se puede deshacer.`,
+        t("main.groupDetail.delete_title"),
+        t("main.groupDetail.delete_desc", { name: group.name }),
         [
-          { text: "Cancelar", style: "cancel" },
+          { text: t("common.cancel"), style: "cancel" },
           {
-            text: "Eliminar Grupo",
+            text: t("main.groupDetail.delete_btn"),
             style: "destructive",
             onPress: () => {
               quitGroup(group.id, true);
@@ -161,12 +163,12 @@ export default function GroupDetailScreen() {
       );
     } else {
       alert(
-        "Salir del grupo",
-        `¿Estás seguro de que quieres salir de "${group.name}"?`,
+        t("main.groupDetail.leave_title"),
+        t("main.groupDetail.leave_desc", { name: group.name }),
         [
-          { text: "Cancelar", style: "cancel" },
+          { text: t("common.cancel"), style: "cancel" },
           {
-            text: "Salir",
+            text: t("main.groupDetail.leave_btn"),
             style: "destructive",
             onPress: () => {
               quitGroup(group.id, false);
@@ -217,7 +219,7 @@ export default function GroupDetailScreen() {
                 <View className="self-start bg-primary px-3 py-1.5 rounded-full flex-row items-center gap-1.5">
                   <MessageCircle size={14} color="white" />
                   <Text className="text-primary-foreground text-xs font-bold">
-                    Organizador
+                    {t("main.groupDetail.role_organizer")}
                   </Text>
                 </View>
               )}
@@ -235,7 +237,7 @@ export default function GroupDetailScreen() {
                   <Users size={14} color="#737373" />
                   <View>
                     <Text className="text-muted-foreground text-xs font-semibold uppercase">
-                      PIN
+                      {t("main.groupDetail.pin")}
                     </Text>
                     <Text className="text-foreground font-bold text-sm">
                       {group.invitePin}
@@ -246,13 +248,13 @@ export default function GroupDetailScreen() {
             )}
           </View>
           <Text className="text-muted-foreground text-sm">
-            Eres {isOrganizer ? "organizador" : "participante"} de este grupo.
+            {isOrganizer ? t("main.groupDetail.role_msg_organizer") : t("main.groupDetail.role_msg_participant")}
           </Text>
         </View>
 
         {/* Título de sección y Botón "Nueva" */}
         <View className="flex-row justify-between items-center mb-6">
-          <Text className="text-foreground text-2xl font-bold">Reuniones</Text>
+          <Text className="text-foreground text-2xl font-bold">{t("main.groupDetail.meetings_title")}</Text>
 
           {isOrganizer && (
             <TouchableOpacity
@@ -260,7 +262,7 @@ export default function GroupDetailScreen() {
               onPress={() => setIsModalVisible(true)}
             >
               <Plus color="white" size={16} />
-              <Text className="text-primary-foreground font-bold text-sm">Nueva</Text>
+              <Text className="text-primary-foreground font-bold text-sm">{t("main.groupDetail.btn_new")}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -273,10 +275,10 @@ export default function GroupDetailScreen() {
               <CalendarClock size={40} color="#737373" />
             </View>
             <Text className="text-foreground text-xl font-bold mb-3 text-center">
-              No hay reuniones todavía
+              {t("main.groupDetail.empty_title")}
             </Text>
             <Text className="text-muted-foreground text-center mb-8 text-base px-4">
-              Las reuniones de este grupo aparecerán aquí. {isOrganizer ? "Crea la primera reunión para empezar." : "Espera a que el organizador programe una."}
+              {isOrganizer ? t("main.groupDetail.empty_desc_org") : t("main.groupDetail.empty_desc_part")}
             </Text>
             {isOrganizer && (
               <TouchableOpacity
@@ -285,7 +287,7 @@ export default function GroupDetailScreen() {
               >
                 <Plus color="white" size={20} />
                 <Text className="text-primary-foreground font-bold text-base">
-                  Crear la primera
+                  {t("main.groupDetail.btn_create_first")}
                 </Text>
               </TouchableOpacity>
             )}
@@ -299,7 +301,7 @@ export default function GroupDetailScreen() {
                 <View className="flex-row items-center gap-2 mb-4">
                   <View className="w-2 h-2 rounded-full bg-emerald-500" />
                   <Text className="text-sm font-bold text-emerald-600 uppercase tracking-wider">
-                    Requieren atención
+                    {t("main.groupDetail.section_attention")}
                   </Text>
                 </View>
                 <View className="gap-4">
@@ -316,7 +318,7 @@ export default function GroupDetailScreen() {
                 <View className="flex-row items-center gap-2 mb-4 mt-6">
                   <View className="w-2 h-2 rounded-full bg-yellow-500" />
                   <Text className="text-sm font-bold text-yellow-600 uppercase tracking-wider">
-                    Próximas y Borradores
+                    {t("main.groupDetail.section_upcoming")}
                   </Text>
                 </View>
                 <View className="gap-4">
@@ -337,7 +339,7 @@ export default function GroupDetailScreen() {
                 >
                   <View className="flex-row items-center gap-3">
                     <Package size={20} color="#737373" />
-                    <Text className="text-base font-bold text-foreground">Historial</Text>
+                    <Text className="text-base font-bold text-foreground">{t("main.groupDetail.section_history")}</Text>
                     <View className="bg-primary/10 px-2 py-0.5 rounded-full ml-1">
                       <Text className="text-primary text-xs font-bold">{closedMeetings.length}</Text>
                     </View>

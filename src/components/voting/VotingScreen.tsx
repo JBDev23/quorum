@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { AppState, View, type AppStateStatus } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 
@@ -57,6 +58,7 @@ export function VotingScreen({
   isOrganizer = false,
   startDate = null,
 }: VotingScreenProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { bioAuthEnabled } = usePreferences();
 
@@ -74,7 +76,7 @@ export function VotingScreen({
     } catch (error) {
       console.error(error);
       setLoadError(
-        toNetworkAwareMessage(error, "No se pudo cargar la votación")
+        toNetworkAwareMessage(error, t("voting.screen.error_load"))
       );
     } finally {
       setLoading(false);
@@ -182,17 +184,17 @@ export function VotingScreen({
 
       const network = isNetworkError(error);
       const message = network
-        ? NETWORK_VOTE_MESSAGE
+        ? t("common.no_connection")
         : error instanceof Error
           ? error.message
-          : "No se pudo emitir el voto";
+          : t("voting.screen.error_cast");
 
-      alert(network ? "Sin conexión" : "Error", message, [
-        { text: "Entendido", style: "cancel" },
+      alert(network ? t("common.no_connection") : t("common.error"), message, [
+        { text: t("common.understood"), style: "cancel" },
         ...(network
           ? [
             {
-              text: "Reintentar",
+              text: t("common.retry"),
               onPress: () => {
                 void handleVote(optionId, isBlank).catch(() => {
                   // ActiveUrn resets submitting on reject; alert already shown.

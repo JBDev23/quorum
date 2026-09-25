@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { Home } from "lucide-react-native";
 
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useTranslation } from "react-i18next";
 
 type MeetingExitButtonProps = {
   /** Optional override for contrast on colored headers. */
@@ -15,12 +16,13 @@ export function MeetingExitButton({
   className = "bg-primary/10",
 }: MeetingExitButtonProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
 
   return (
     <TouchableOpacity
       onPress={() => router.replace("/(main)")}
       accessibilityRole="button"
-      accessibilityLabel="Salir de la reunión"
+      accessibilityLabel={t("components.exitButton.accessibility")}
       className={`w-8 h-8 rounded-full items-center justify-center ${className}`}
       hitSlop={8}
     >

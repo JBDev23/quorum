@@ -5,6 +5,7 @@ import {
   MEETING_STATUS_LABELS,
   type MeetingStatus,
 } from "@/types/meeting";
+import { useTranslation } from "react-i18next";
 
 const STATUS_STYLES: Record<
   MeetingStatus,
@@ -42,6 +43,7 @@ type StatusBadgeProps = {
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  const { t } = useTranslation();
   const styles = STATUS_STYLES[status];
 
   return (
@@ -50,7 +52,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     >
       <ShieldAlert size={14} color={styles.icon} />
       <Text className={`font-semibold text-sm ${styles.text}`}>
-        Fase: {MEETING_STATUS_LABELS[status]}
+        {t("voting.hardcoded.phase")} {MEETING_STATUS_LABELS[status]}
       </Text>
     </View>
   );

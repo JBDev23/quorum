@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X, FileText, Table, CheckSquare, Square } from "lucide-react-native";
 import { exportMeetingResults, type ExportFormat, type ExportOptions } from "@/services/export";
@@ -12,6 +13,7 @@ interface ExportResultsModalProps {
 }
 
 export function ExportResultsModal({ visible, onClose, meetingId }: ExportResultsModalProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const [format, setFormat] = useState<ExportFormat>("pdf");
   const [options, setOptions] = useState<ExportOptions>({
@@ -24,7 +26,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
 
   const handleExport = async () => {
     if (!options.includeResults && !options.includeAttendance && !options.includeAudit) {
-      setError("Selecciona al menos un dato para exportar.");
+      setError(t("voting.export_modal.error_min_select"));
       return;
     }
 
@@ -35,7 +37,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
       onClose(); // Close on success
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Error al exportar los resultados.");
+      setError(err instanceof Error ? err.message : t("voting.export_modal.error_export"));
     } finally {
       setLoading(false);
     }
@@ -50,14 +52,14 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
       <View className="flex-1 bg-black/50 justify-end">
         <SafeAreaView edges={["bottom"]} className="bg-card rounded-t-3xl p-6">
           <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-foreground text-xl font-bold">Exportar Resultados</Text>
+            <Text className="text-foreground text-xl font-bold">{t("voting.export_modal.title")}</Text>
             <TouchableOpacity onPress={onClose} disabled={loading} className="p-2">
               <X size={24} color={colors.foreground} />
             </TouchableOpacity>
           </View>
 
           {/* Formato */}
-          <Text className="text-foreground font-semibold mb-3">Formato del archivo</Text>
+          <Text className="text-foreground font-semibold mb-3">{t("voting.export_modal.format")}</Text>
           <View className="flex-row gap-4 mb-6">
             <TouchableOpacity
               onPress={() => setFormat("pdf")}
@@ -71,7 +73,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
                   format === "pdf" ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                Documento PDF
+                {t("voting.export_modal.pdf")}
               </Text>
             </TouchableOpacity>
 
@@ -87,13 +89,13 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
                   format === "csv" ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                Hoja de cálculo (CSV)
+                {t("voting.export_modal.csv")}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* Datos a incluir */}
-          <Text className="text-foreground font-semibold mb-3">Datos a incluir</Text>
+          <Text className="text-foreground font-semibold mb-3">{t("voting.export_modal.data_include")}</Text>
           <View className="gap-3 mb-6">
             <TouchableOpacity
               onPress={() => toggleOption("includeResults")}
@@ -104,7 +106,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
               ) : (
                 <Square size={24} color={colors.mutedForeground} />
               )}
-              <Text className="text-foreground ml-3 text-base">Resultados de votaciones</Text>
+              <Text className="text-foreground ml-3 text-base">{t("voting.export_modal.data_results")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -116,7 +118,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
               ) : (
                 <Square size={24} color={colors.mutedForeground} />
               )}
-              <Text className="text-foreground ml-3 text-base">Lista de asistentes</Text>
+              <Text className="text-foreground ml-3 text-base">{t("voting.export_modal.data_attendance")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -129,7 +131,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
                 <Square size={24} color={colors.mutedForeground} />
               )}
               <Text className="text-foreground ml-3 text-base">
-                Registro de auditoría (fechas/horas)
+                {t("voting.export_modal.data_audit")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -147,7 +149,7 @@ export function ExportResultsModal({ visible, onClose, meetingId }: ExportResult
               <ActivityIndicator color={colors.card} />
             ) : (
               <Text className="text-primary-foreground font-bold text-lg">
-                Generar {format.toUpperCase()}
+                {t("voting.export_modal.generate", { format: format.toUpperCase() })}
               </Text>
             )}
           </TouchableOpacity>

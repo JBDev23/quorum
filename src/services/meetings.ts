@@ -2,11 +2,12 @@ import { FREE_TIER_PARTICIPANT_LIMIT } from "@/constants/limits";
 import type { MeetingCardProps } from "@/components/MeetingCard";
 import { supabase } from "@/lib/supabase";
 import type { MeetingStatus } from "@/types/meeting";
+import i18n from "@/lib/i18n";
 
 export class ParticipantLimitError extends Error {
   constructor() {
     super(
-      `Límite de ${FREE_TIER_PARTICIPANT_LIMIT} participantes alcanzado. Mejora a Premium para desbloquear el aforo ilimitado.`
+      i18n.t("services.meetings.limit_reached", { limit: FREE_TIER_PARTICIPANT_LIMIT })
     );
     this.name = "ParticipantLimitError";
   }
@@ -33,9 +34,10 @@ function formatMeetingDate(
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : null;
   const now = Date.now();
+  const locale = i18n.language === "en" ? "en-US" : "es-ES";
 
   if (status === "closed") {
-    return start.toLocaleDateString("es-ES", {
+    return start.toLocaleDateString(locale, {
       day: "numeric",
       month: "short",
     });
@@ -44,18 +46,18 @@ function formatMeetingDate(
   if (status === "active" || (start.getTime() <= now && (!end || end.getTime() >= now))) {
     if (end) {
       const hoursLeft = Math.max(0, Math.round((end.getTime() - now) / 3_600_000));
-      if (hoursLeft <= 0) return "Ahora";
-      return `Termina en ${hoursLeft}h`;
+      if (hoursLeft <= 0) return i18n.t("components.meetingCard.date_now");
+      return i18n.t("components.meetingCard.date_ends_in", { hours: hoursLeft });
     }
-    return "Ahora";
+    return i18n.t("components.meetingCard.date_now");
   }
 
   const msUntilStart = start.getTime() - now;
   const hoursUntil = Math.round(msUntilStart / 3_600_000);
-  if (hoursUntil < 1) return "Empieza pronto";
-  if (hoursUntil < 24) return `Empieza en ${hoursUntil}h`;
+  if (hoursUntil < 1) return i18n.t("components.meetingCard.date_starts_soon");
+  if (hoursUntil < 24) return i18n.t("components.meetingCard.date_starts_in", { hours: hoursUntil });
 
-  return start.toLocaleDateString("es-ES", {
+  return start.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
   });
@@ -160,21 +162,21 @@ export async function accreditParticipant(
       throw new ParticipantLimitError();
     }
     if (msg.includes("ERR_UNAUTHORIZED")) {
-      throw new Error("Solo el organizador puede acreditar.");
+      throw new Error(i18n.t("services.meetings.only_organizer_accredit"));
     }
     if (msg.includes("ERR_INVALID_STATUS")) {
-      throw new Error("La reunión no está en fase de acreditación.");
+      throw new Error(i18n.t("services.meetings.not_in_accreditation"));
     }
     if (msg.includes("ERR_NOT_MEMBER")) {
-      throw new Error("Este usuario no pertenece al grupo.");
+      throw new Error(i18n.t("services.meetings.not_in_group"));
     }
     if (msg.includes("ERR_NOT_FOUND")) {
-      throw new Error("Reunión no encontrada.");
+      throw new Error(i18n.t("services.meetings.not_found"));
     }
     if (msg.includes("ERR_NOT_AUTHENTICATED")) {
-      throw new Error("Sesión expirada. Vuelve a iniciar sesión.");
+      throw new Error(i18n.t("services.meetings.session_expired"));
     }
-    throw new Error("No se pudo acreditar al participante.");
+    throw new Error(i18n.t("services.meetings.accredit_error"));
   }
 
   return "created";
@@ -198,7 +200,7 @@ export async function createMeeting(
 
   if (error) {
     console.error("Error creating meeting:", error);
-    throw new Error("No se pudo crear la reunión. Verifica tus permisos.");
+    throw new Error(i18n.t("services.meetings.create_error"));
   }
 
   return data.id;
@@ -229,7 +231,7 @@ export async function updateMeetingStatus(
 
   if (error) {
     console.error("Error updating meeting status:", error);
-    throw new Error("No se pudo cambiar el estado de la reunión.");
+    throw new Error(i18n.t("services.meetings.update_status_error"));
   }
 }
 
@@ -239,7 +241,7 @@ export async function updateMeetingDate(meetingId: string, startDate: Date) {
     .update({ start_date: startDate.toISOString() })
     .eq("id", meetingId);
 
-  if (error) throw new Error("No se pudo actualizar la fecha de la reunión.");
+  if (error) throw new Error(i18n.t("services.meetings.update_date_error"));
 }
 
 export async function fetchAllowBlankVotes(meetingId: string): Promise<boolean> {
@@ -263,7 +265,7 @@ export async function updateAllowBlankVotes(
     .eq("id", meetingId);
 
   if (error) {
-    throw new Error("No se pudo actualizar la opción de voto en blanco.");
+    throw new Error(i18n.t("services.meetings.update_blank_error"));
   }
 }
 
@@ -293,12 +295,12 @@ export async function updateAllowDelegations(
       throw new Error("PREMIUM_REQUIRED");
     }
     if (msg.includes("ERR_UNAUTHORIZED")) {
-      throw new Error("Solo el organizador puede cambiar esta opción.");
+      throw new Error(i18n.t("services.meetings.only_organizer_blank"));
     }
     if (msg.includes("ERR_NOT_AUTHENTICATED")) {
-      throw new Error("Sesión expirada. Vuelve a iniciar sesión.");
+      throw new Error(i18n.t("services.meetings.session_expired"));
     }
-    throw new Error("No se pudo actualizar la opción de delegaciones.");
+    throw new Error(i18n.t("services.meetings.update_delegations_error"));
   }
 }
 
@@ -361,7 +363,7 @@ export async function fetchAttendanceList(
     .select("user_id, users(first_name, last_name, avatar_url)")
     .eq("group_id", groupId);
 
-  if (membersError) throw new Error("No se pudieron cargar los miembros");
+  if (membersError) throw new Error(i18n.t("services.meetings.load_members_error"));
 
   // 2. Obtenemos quiénes se han acreditado
   const { data: attendances, error: attendancesError } = await supabase
@@ -369,7 +371,7 @@ export async function fetchAttendanceList(
     .select("user_id")
     .eq("meeting_id", meetingId);
 
-  if (attendancesError) throw new Error("No se pudieron cargar las acreditaciones");
+  if (attendancesError) throw new Error(i18n.t("services.meetings.load_accreditations_error"));
 
   const accreditedIds = new Set(attendances.map((a) => a.user_id));
 
@@ -380,7 +382,7 @@ export async function fetchAttendanceList(
     // Concatenamos nombre y apellido de forma segura por si alguno es null
     const firstName = userData?.first_name || "";
     const lastName = userData?.last_name || "";
-    const fullName = [firstName, lastName].filter(Boolean).join(" ") || "Usuario Desconocido";
+    const fullName = [firstName, lastName].filter(Boolean).join(" ") || i18n.t("services.meetings.unknown_user");
 
     return {
       user_id: m.user_id,

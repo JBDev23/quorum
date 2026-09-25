@@ -11,6 +11,7 @@ import { Users } from "lucide-react-native";
 import { supabase } from "@/lib/supabase";
 import { getPollRealtimeStats } from "@/services/polls";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useTranslation } from "react-i18next";
 
 interface ActivePollStatsProps {
   pollId: string;
@@ -18,6 +19,7 @@ interface ActivePollStatsProps {
 }
 
 export function ActivePollStats({ pollId, meetingId }: ActivePollStatsProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const [votes, setVotes] = useState(0);
   const [total, setTotal] = useState(0);
@@ -113,11 +115,11 @@ export function ActivePollStats({ pollId, meetingId }: ActivePollStatsProps) {
         <View className="flex-row items-center gap-2">
           <Users size={18} color="#6A7398" />
           <Text className="text-[#6A7398] font-medium text-sm">
-            Participación en vivo
+            {t("voting.hardcoded.live_participation")}
           </Text>
         </View>
         <Text className="text-[#1C2035] font-extrabold text-sm">
-          {votes} / {total} votos
+          {votes} / {total} {t("voting.hardcoded.votes")}
         </Text>
       </View>
 
@@ -128,7 +130,7 @@ export function ActivePollStats({ pollId, meetingId }: ActivePollStatsProps) {
         />
       </View>
       <Text className="text-right text-[#3A33A3] text-xs font-bold">
-        {progressPercent}% escrutado
+        {progressPercent} {t("voting.hardcoded.counted_percentage")}
       </Text>
     </View>
   );

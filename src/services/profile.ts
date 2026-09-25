@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { decode } from "base64-arraybuffer";
 import { getStoredReceipt } from "@/services/votes";
+import i18n from "@/lib/i18n";
 
 export type UserProfile = {
     first_name: string | null;
@@ -23,7 +24,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
         .eq("id", userId)
         .single();
 
-    if (error) throw new Error("No se pudo cargar el perfil del usuario.");
+    if (error) throw new Error(i18n.t("services.profile.load_profile_error"));
     return data;
 }
 
@@ -49,7 +50,7 @@ export async function getUserStats(userId: string): Promise<UserStats> {
     ]);
 
     if (groupsError || meetingsError || votesError) {
-        throw new Error("Error al calcular las estadísticas.");
+        throw new Error(i18n.t("services.profile.stats_error"));
     }
 
     return {
@@ -73,7 +74,7 @@ export async function updateUserProfile(
         })
         .eq("id", userId);
 
-    if (error) throw new Error("No se pudo guardar la información del perfil.");
+    if (error) throw new Error(i18n.t("services.profile.update_profile_error"));
 }
 
 export type VoteReceipt = {
@@ -100,7 +101,7 @@ export async function getNotificationPrefs(
         .eq("id", userId)
         .single();
 
-    if (error) throw new Error("No se pudieron cargar las preferencias de notificación.");
+    if (error) throw new Error(i18n.t("services.profile.load_notifications_error"));
 
     return {
         notify_new_meetings: data.notify_new_meetings ?? true,
@@ -118,7 +119,7 @@ export async function updateNotificationPrefs(
         .update(prefs)
         .eq("id", userId);
 
-    if (error) throw new Error("No se pudieron guardar las preferencias de notificación.");
+    if (error) throw new Error(i18n.t("services.profile.update_notifications_error"));
 }
 
 export async function getVoteReceipts(userId: string): Promise<VoteReceipt[]> {
@@ -137,7 +138,7 @@ export async function getVoteReceipts(userId: string): Promise<VoteReceipt[]> {
         .eq("user_id", userId)
         .order("voted_at", { ascending: false });
 
-    if (error) throw new Error("No se pudieron cargar los recibos de voto.");
+    if (error) throw new Error(i18n.t("services.profile.load_receipts_error"));
 
     return Promise.all(
         (data || []).map(async (item: any) => {
@@ -146,8 +147,8 @@ export async function getVoteReceipts(userId: string): Promise<VoteReceipt[]> {
             return {
                 poll_id: pollId,
                 voted_at: item.voted_at as string,
-                poll_title: item.polls?.title || "Votación desconocida",
-                meeting_title: item.polls?.meetings?.title || "Asamblea desconocida",
+                poll_title: item.polls?.title || i18n.t("services.profile.unknown_poll"),
+                meeting_title: item.polls?.meetings?.title || i18n.t("services.profile.unknown_meeting"),
                 receipt_hash,
             };
         })
@@ -169,7 +170,7 @@ export async function uploadAvatar(
             upsert: true,
         });
 
-    if (uploadError) throw new Error("No se pudo subir la imagen a los servidores.");
+    if (uploadError) throw new Error(i18n.t("services.profile.upload_avatar_error"));
 
     // 2. Obtenemos la URL pública
     const { data: publicUrlData } = supabase.storage
@@ -184,7 +185,7 @@ export async function uploadAvatar(
         .update({ avatar_url: publicUrl })
         .eq("id", userId);
 
-    if (updateError) throw new Error("Se subió la imagen pero no se pudo actualizar el perfil.");
+    if (updateError) throw new Error(i18n.t("services.profile.update_avatar_error"));
 
     return publicUrl;
 }

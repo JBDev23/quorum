@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Platform,
@@ -59,6 +60,7 @@ function LogoIcon() {
 }
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const {
     session,
     signInWithPassword,
@@ -102,13 +104,13 @@ export default function LoginScreen() {
         return;
       }
       if (successMessage) {
-        alert("Listo", successMessage);
+        alert(t("auth.login.alert_success"), successMessage);
       } else {
         goHomeAfterAuth();
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error de autenticación";
-      alert("Error", message);
+      const message = error instanceof Error ? error.message : t("auth.login.err_default");
+      alert(t("auth.login.alert_error"), message);
     } finally {
       setBusy(false);
     }
@@ -116,7 +118,7 @@ export default function LoginScreen() {
 
   const onSocial = (provider: SocialProvider) => {
     if (mode === "signup" && !acceptPrivacy) {
-      alert("Atención", "Debes aceptar los Términos y la Política de Privacidad para registrarte.");
+      alert(t("auth.login.alert_attention"), t("auth.login.err_accept_privacy"));
       return;
     }
     run(() => signInWithOAuth(provider));
@@ -130,16 +132,16 @@ export default function LoginScreen() {
   const handlePasswordSubmit = () => {
     const trimmedEmail = email.trim();
     if (!validateEmail(trimmedEmail)) {
-      alert("Atención", "Por favor, introduce un correo electrónico válido.");
+      alert(t("auth.login.alert_attention"), t("auth.login.err_invalid_email"));
       return;
     }
     if (password.length < 6) {
-      alert("Atención", "La contraseña debe tener al menos 6 caracteres.");
+      alert(t("auth.login.alert_attention"), t("auth.login.err_short_password"));
       return;
     }
     
     if (mode === "signup" && (!firstName.trim() || !lastName.trim())) {
-      alert("Atención", "Por favor, rellena tu nombre y apellidos.");
+      alert(t("auth.login.alert_attention"), t("auth.login.err_missing_names"));
       return;
     }
 
@@ -156,12 +158,12 @@ export default function LoginScreen() {
   const handleMagicLink = () => {
     const trimmedEmail = email.trim();
     if (!validateEmail(trimmedEmail)) {
-      alert("Atención", "Por favor, introduce un correo electrónico válido para enviarte el enlace.");
+      alert(t("auth.login.alert_attention"), t("auth.login.err_magic_link_email"));
       return;
     }
     run(
       () => signInWithMagicLink(trimmedEmail),
-      "Revisa tu email para el enlace de acceso."
+      t("auth.login.msg_magic_link_sent")
     );
   };
 
@@ -181,7 +183,7 @@ export default function LoginScreen() {
           <View className="px-8 pb-10 pt-4 items-center justify-center" style={{ paddingTop: Math.max(insets.top, 48) + 16 }}>
             <LogoIcon />
             <Text className="text-primary-foreground/80 text-base mt-4 text-center">
-              Votaciones seguras y anónimas para tu comunidad.
+              {t("auth.login.subtitle")}
             </Text>
           </View>
 
@@ -209,7 +211,7 @@ export default function LoginScreen() {
             {visibleSocial.length > 0 && (
               <View className="flex-row items-center gap-4 mb-6">
                 <View className="flex-1 h-[1px] bg-muted" />
-                <Text className="text-muted-foreground text-sm font-medium">o con email</Text>
+                <Text className="text-muted-foreground text-sm font-medium">{t("auth.login.or_email")}</Text>
                 <View className="flex-1 h-[1px] bg-muted" />
               </View>
             )}
@@ -217,10 +219,10 @@ export default function LoginScreen() {
             {mode === "signup" ? (
               <View className="flex-row gap-3 mb-4">
                 <View className="flex-1">
-                  <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">Nombre</Text>
+                  <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">{t("auth.login.name_label")}</Text>
                   <TextInput
                     className="bg-card border border-border rounded-2xl px-5 py-4 text-foreground text-base"
-                    placeholder="Nombre"
+                    placeholder={t("auth.login.name_placeholder")}
                     placeholderTextColor="#9CA3AF"
                     autoCapitalize="words"
                     value={firstName}
@@ -228,10 +230,10 @@ export default function LoginScreen() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">Apellidos</Text>
+                  <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">{t("auth.login.surname_label")}</Text>
                   <TextInput
                     className="bg-card border border-border rounded-2xl px-5 py-4 text-foreground text-base"
-                    placeholder="Apellidos"
+                    placeholder={t("auth.login.surname_placeholder")}
                     placeholderTextColor="#9CA3AF"
                     autoCapitalize="words"
                     value={lastName}
@@ -242,10 +244,10 @@ export default function LoginScreen() {
             ) : null}
 
             <View className="mb-4">
-              <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">Email</Text>
+              <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">{t("auth.login.email_label")}</Text>
               <TextInput
                 className="bg-card border border-border rounded-2xl px-5 py-4 text-foreground text-base"
-                placeholder="tu@email.es"
+                placeholder={t("auth.login.email_placeholder")}
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -255,11 +257,11 @@ export default function LoginScreen() {
             </View>
 
             <View className="mb-8">
-              <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">Contraseña</Text>
+              <Text className="text-muted-foreground text-xs font-bold tracking-wider mb-2 uppercase">{t("auth.login.password_label")}</Text>
               <View className="relative justify-center">
                 <TextInput
                   className="bg-card border border-border rounded-2xl px-5 py-4 pr-12 text-foreground text-base"
-                  placeholder="••••••••"
+                  placeholder={t("auth.login.password_placeholder")}
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!showPassword}
                   value={password}
@@ -293,13 +295,13 @@ export default function LoginScreen() {
                     )}
                   </View>
                   <Text className="text-muted-foreground text-sm flex-1 leading-relaxed">
-                    He leído y acepto los{" "}
+                    {t("auth.login.accept_terms")}{" "}
                     <Text className="text-primary font-bold underline" onPress={() => setShowTerms(true)}>
-                      Términos y Condiciones
+                      {t("auth.login.terms")}
                     </Text>{" "}
-                    y la{" "}
+                    {t("auth.login.and_the")}{" "}
                     <Text className="text-primary font-bold underline" onPress={() => setShowPrivacy(true)}>
-                      Política de Privacidad
+                      {t("auth.login.privacy")}
                     </Text>.
                   </Text>
                 </TouchableOpacity>
@@ -311,13 +313,13 @@ export default function LoginScreen() {
               disabled={busy || (mode === "signup" && !acceptPrivacy)}
               onPress={handlePasswordSubmit}
               accessibilityRole="button"
-              accessibilityLabel={mode === "signin" ? "Entrar" : "Registrarse"}
+              accessibilityLabel={mode === "signin" ? t("auth.login.button_login") : t("auth.login.button_signup")}
             >
               {busy ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text className="text-primary-foreground font-bold text-lg">
-                  {mode === "signin" ? "Entrar" : "Registrarse"}
+                  {mode === "signin" ? t("auth.login.button_login") : t("auth.login.button_signup")}
                 </Text>
               )}
             </TouchableOpacity>
@@ -327,10 +329,10 @@ export default function LoginScreen() {
               disabled={busy || (mode === "signup" && !acceptPrivacy)}
               onPress={handleMagicLink}
               accessibilityRole="button"
-              accessibilityLabel="Enviar magic link"
+              accessibilityLabel={t("auth.login.magic_link")}
             >
               <Sparkles size={18} color="#4B5563" className="mr-2" />
-              <Text className="text-muted-foreground font-semibold text-base">Enviar magic link</Text>
+              <Text className="text-muted-foreground font-semibold text-base">{t("auth.login.magic_link")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -340,9 +342,9 @@ export default function LoginScreen() {
             >
               <Text className="text-muted-foreground text-base">
                 {mode === "signin" ? (
-                  <>¿No tienes cuenta? <Text className="text-primary font-bold">Regístrate</Text></>
+                  <>{t("auth.login.no_account")} <Text className="text-primary font-bold">{t("auth.login.register_action")}</Text></>
                 ) : (
-                  <>¿Ya tienes cuenta? <Text className="text-primary font-bold">Inicia sesión</Text></>
+                  <>{t("auth.login.have_account")} <Text className="text-primary font-bold">{t("auth.login.login_action")}</Text></>
                 )}
               </Text>
             </TouchableOpacity>
@@ -350,13 +352,13 @@ export default function LoginScreen() {
             {mode === "signin" && (
               <View className="items-center px-4">
                 <Text className="text-muted-foreground text-[11px] text-center leading-relaxed">
-                  Al iniciar sesión, aceptas nuestros{" "}
+                  {t("auth.login.login_terms")}{" "}
                   <Text className="text-primary font-bold underline" onPress={() => setShowTerms(true)}>
-                    Términos y Condiciones
+                    {t("auth.login.terms")}
                   </Text>{" "}
-                  y la{" "}
+                  {t("auth.login.and_the")}{" "}
                   <Text className="text-primary font-bold underline" onPress={() => setShowPrivacy(true)}>
-                    Política de Privacidad
+                    {t("auth.login.privacy")}
                   </Text>
                 </Text>
               </View>

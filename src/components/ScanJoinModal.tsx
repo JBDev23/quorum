@@ -3,6 +3,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { CameraView, Camera } from "expo-camera";
 import { X } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { alert } from "@/components/Alert";
 import { useThemeColors } from "@/theme/useThemeColors";
 
@@ -13,6 +14,7 @@ interface ScanJoinModalProps {
 }
 
 export function ScanJoinModal({ visible, onClose, onScanSuccess }: ScanJoinModalProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
@@ -38,8 +40,8 @@ export function ScanJoinModal({ visible, onClose, onScanSuccess }: ScanJoinModal
         throw new Error("QR no reconocido");
       }
     } catch (error) {
-      alert("QR Inválido", "Este código no es una invitación de quorum válida.", [
-        { text: "Reintentar", onPress: () => setScanned(false) }
+      alert(t("components.scanJoin.invalid_qr_title"), t("components.scanJoin.invalid_qr_desc"), [
+        { text: t("common.retry"), onPress: () => setScanned(false) }
       ]);
     }
   };
@@ -51,9 +53,9 @@ export function ScanJoinModal({ visible, onClose, onScanSuccess }: ScanJoinModal
       <View className="flex-1 bg-background">
         {hasPermission === false ? (
           <View className="flex-1 justify-center items-center px-4 bg-background">
-            <Text className="text-foreground text-center mb-4">No has dado permiso a la cámara.</Text>
+            <Text className="text-foreground text-center mb-4">{t("components.scanJoin.no_permission")}</Text>
             <TouchableOpacity onPress={onClose} className="bg-muted px-6 py-3 rounded-xl">
-              <Text className="text-foreground">Volver</Text>
+              <Text className="text-foreground">{t("components.scanJoin.go_back")}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -80,7 +82,7 @@ export function ScanJoinModal({ visible, onClose, onScanSuccess }: ScanJoinModal
                 <X color="white" size={20} />
               </TouchableOpacity>
               <Text className="text-primary-foreground text-xl font-extrabold flex-1" numberOfLines={1}>
-                Escanear Invitación
+                {t("components.scanJoin.scan_title")}
               </Text>
             </View>
 
@@ -90,7 +92,7 @@ export function ScanJoinModal({ visible, onClose, onScanSuccess }: ScanJoinModal
             >
               <View className="bg-card px-6 py-4 rounded-[24px] shadow-lg flex-row items-center gap-3">
                 <View className="w-2.5 h-2.5 rounded-full bg-primary" />
-                <Text className="text-foreground font-bold">Apunta a un código QR</Text>
+                <Text className="text-foreground font-bold">{t("components.scanJoin.aim_qr")}</Text>
               </View>
             </View>
           </View>

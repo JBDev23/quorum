@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowRight, ScanLine, Users } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { alert } from "@/components/Alert";
 import { useGroups } from "@/hooks/useGroups";
@@ -22,6 +23,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { GroupsSkeleton } from "@/components/skeletons/GroupsSkeleton";
 
 export default function GroupsScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const {
     groups,
@@ -47,8 +49,8 @@ export default function GroupsScreen() {
       setCreateModalVisible(false);
     } catch (err) {
       alert(
-        "Error",
-        err instanceof Error ? err.message : "No se pudo crear el grupo",
+        t("common.error"),
+        err instanceof Error ? err.message : t("main.groups.error_create"),
       );
     }
   };
@@ -63,8 +65,8 @@ export default function GroupsScreen() {
       setScanModalVisible(false);
     } catch (err) {
       alert(
-        "Error",
-        err instanceof Error ? err.message : "No se pudo unir al grupo",
+        t("common.error"),
+        err instanceof Error ? err.message : t("main.groups.error_join"),
       );
     }
   };
@@ -79,9 +81,9 @@ export default function GroupsScreen() {
       >
         {/* Cabecera Principal */}
         <View className="w-full bg-background px-6 pt-6 pb-4 z-10">
-          <Text className="text-3xl font-extrabold text-foreground mb-1">Grupos</Text>
+          <Text className="text-3xl font-extrabold text-foreground mb-1">{t("main.groups.title")}</Text>
           <Text className="text-muted-foreground text-base font-medium">
-            {loading ? "Cargando…" : `Perteneces a ${groups.length} grupos`}
+            {loading ? t("main.groups.loading") : t("main.groups.subtitle", { count: groups.length })}
           </Text>
         </View>
 
@@ -90,7 +92,7 @@ export default function GroupsScreen() {
         <View className="bg-card border border-border p-2 rounded-[24px] flex-row items-center mb-8 shadow-sm">
           <TextInput
             className="flex-1 text-foreground text-base font-mono tracking-widest px-4 py-3 h-14"
-            placeholder="PIN de acceso"
+            placeholder={t("main.groups.pin_placeholder")}
             placeholderTextColor={colors.mutedForeground}
             autoCapitalize="characters"
             maxLength={8}
@@ -138,9 +140,9 @@ export default function GroupsScreen() {
           className="items-center mt-2 mb-6"
         >
           <Text className="text-muted-foreground text-sm font-medium">
-            ¿Eres organizador?{" "}
+            {t("main.groups.are_you_organizer")}
             <Text className="text-primary font-bold">
-              Crea un grupo nuevo
+              {t("main.groups.create_new_group")}
             </Text>
           </Text>
         </TouchableOpacity>
@@ -154,10 +156,10 @@ export default function GroupsScreen() {
               <Users size={36} color={colors.mutedForeground} />
             </View>
             <Text className="text-xl font-bold text-foreground text-center mb-2">
-              No hay grupos
+              {t("main.groups.empty_title")}
             </Text>
             <Text className="text-sm text-muted-foreground text-center leading-relaxed mb-8">
-              Todavía no perteneces a ningún grupo. Puedes crear uno nuevo o unirte usando un código o escaneando un QR.
+              {t("main.groups.empty_desc")}
             </Text>
             
             <View className="w-full gap-3">
@@ -165,14 +167,14 @@ export default function GroupsScreen() {
                 className="w-full bg-primary py-4 rounded-xl items-center justify-center"
                 onPress={() => setCreateModalVisible(true)}
               >
-                <Text className="text-primary-foreground font-bold text-base">Crear un grupo</Text>
+                <Text className="text-primary-foreground font-bold text-base">{t("main.groups.btn_create_group")}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 className="w-full bg-muted py-4 rounded-xl items-center justify-center border border-border"
                 onPress={() => setScanModalVisible(true)}
               >
-                <Text className="text-foreground font-bold text-base">Escanear código QR</Text>
+                <Text className="text-foreground font-bold text-base">{t("main.groups.btn_scan_qr")}</Text>
               </TouchableOpacity>
             </View>
           </View>

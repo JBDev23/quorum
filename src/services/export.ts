@@ -4,6 +4,7 @@ import * as Print from "expo-print";
 import Papa from "papaparse";
 import { supabase } from "@/lib/supabase";
 import { fetchClosedPolls, getPollResults, type Poll } from "./polls";
+import i18n from "@/lib/i18n";
 
 export type ExportOptions = {
   includeResults: boolean;
@@ -21,11 +22,11 @@ async function fetchExportData(meetingId: string, options: ExportOptions) {
     .eq("id", meetingId)
     .single();
 
-  if (meetingError || !meetingData) throw new Error("No se pudo cargar la reunión para exportar.");
+  if (meetingError || !meetingData) throw new Error(i18n.t("services.export.load_meeting_error"));
 
   const groupName = Array.isArray(meetingData.groups)
     ? meetingData.groups[0]?.name
-    : (meetingData.groups as any)?.name || "Grupo";
+    : (meetingData.groups as any)?.name || i18n.t("services.export.group");
 
   // 2. Polls & Results
   let pollsWithResults: Array<Poll & { results: Record<string, number>; blankVotes: number; totalVotes: number }> = [];
@@ -89,8 +90,8 @@ async function fetchExportData(meetingId: string, options: ExportOptions) {
 
     auditLogs = (participations || [])
       .map((p) => ({
-        pollTitle: pollMap.get(p.poll_id) || "Desconocida",
-        fullName: attendanceMap.get(p.user_id) || "Anónimo",
+        pollTitle: pollMap.get(p.poll_id) || i18n.t("services.export.unknown"),
+        fullName: attendanceMap.get(p.user_id) || i18n.t("services.export.anonymous"),
         votedAt: p.voted_at,
       }))
       // Sort by voted_at ascending
@@ -130,45 +131,46 @@ async function exportCSV(data: any, options: ExportOptions) {
     csvContent += Papa.unparse(csvData) + "\n";
   };
 
-  appendSection("Detalles de la Reunión", [{
-    Asamblea: data.meetingTitle,
-    Grupo: data.groupName,
-    Fecha: new Date(data.startDate).toLocaleString("es-ES"),
+  appendSection(i18n.t("services.export.meeting_details"), [{
+    [i18n.t("services.export.assembly")]: data.meetingTitle,
+    [i18n.t("services.export.group")]: data.groupName,
+    [i18n.t("services.export.date")]: new Date(data.startDate).toLocaleString("es-ES"),
   }]);
 
   if (options.includeResults && data.polls.length > 0) {
     const resultsData = data.polls.flatMap((poll: any) => {
       const rows = (poll.poll_options || []).map((opt: any) => ({
-        Votación: poll.title,
-        Opción: opt.text,
-        Votos: poll.results[opt.id] || 0,
+        [i18n.t("services.export.poll")]: poll.title,
+        [i18n.t("services.export.option")]: opt.text,
+        [i18n.t("services.export.votes")]: poll.results[opt.id] || 0,
       }));
       if (poll.blankVotes > 0) {
-        rows.push({ Votación: poll.title, Opción: "Votos en blanco", Votos: poll.blankVotes });
+        rows.push({ [i18n.t("services.export.poll")]: poll.title, [i18n.t("services.export.option")]: i18n.t("services.export.blank_votes"), [i18n.t("services.export.votes")]: poll.blankVotes });
       }
       return rows;
     });
-    appendSection("Resultados de Votaciones", resultsData);
+    appendSection(i18n.t("services.export.voting_results"), resultsData);
   }
 
   if (options.includeAttendance && data.attendance.length > 0) {
     const attendanceData = data.attendance.map((a: any) => ({
-      Nombre: a.fullName,
-      "Acreditado el": a.accreditedAt ? new Date(a.accreditedAt).toLocaleString("es-ES") : "Sí",
+      [i18n.t("services.export.name")]: a.fullName,
+      [i18n.t("services.export.accredited_on")]: a.accreditedAt ? new Date(a.accreditedAt).toLocaleString("es-ES") : i18n.t("services.export.yes"),
     }));
-    appendSection("Asistentes Acreditados", attendanceData);
+    appendSection(i18n.t("services.export.accredited_attendees"), attendanceData);
   }
 
   if (options.includeAudit && data.auditLogs.length > 0) {
     const auditData = data.auditLogs.map((log: any) => ({
-      Votación: log.pollTitle,
-      Votante: log.fullName,
-      "Fecha/Hora Voto": new Date(log.votedAt).toLocaleString("es-ES"),
+      [i18n.t("services.export.poll")]: log.pollTitle,
+      [i18n.t("services.export.voter")]: log.fullName,
+      [i18n.t("services.export.vote_time")]: new Date(log.votedAt).toLocaleString("es-ES"),
     }));
-    appendSection("Registro de Auditoría (Participaciones)", auditData);
+    appendSection(i18n.t("services.export.audit_log"), auditData);
   }
 
-  const csvFile = new File(Paths.document, `Resultados_${data.meetingTitle.replace(/\s+/g, "_")}.csv`);
+  const timestamp = Date.now();
+  const csvFile = new File(Paths.document, `${i18n.t("services.export.results_prefix")}${data.meetingTitle.replace(/\s+/g, "_")}_${timestamp}.csv`);
   csvFile.write(csvContent.trim());
   await shareFile(csvFile.uri, "text/csv");
 }
@@ -216,24 +218,24 @@ async function exportPDF(data: any, options: ExportOptions) {
     </head>
     <body>
       <h1>${data.meetingTitle}</h1>
-      <p>Grupo: <strong>${data.groupName}</strong><br>Fecha: ${formattedDate}</p>
+      <p>${i18n.t("voting.hardcoded.group")} <strong>${data.groupName}</strong><br>${i18n.t("voting.hardcoded.date")} ${formattedDate}</p>
   `;
 
   if (options.includeResults && data.polls.length > 0) {
-    html += `<h2>Resultados de Votaciones</h2>`;
+    html += `<h2>${i18n.t("voting.hardcoded.voting_results")}</h2>`;
     data.polls.forEach((poll: any) => {
       html += `<h3>${poll.title}</h3>`;
       if (poll.totalVotes === 0) {
-        html += `<p>Nadie emitió voto en esta urna.</p>`;
+        html += `<p>${i18n.t("voting.hardcoded.no_votes_ballot")}</p>`;
         return;
       }
 
       html += `<table>
         <tr>
-          <th>Opción</th>
-          <th style="width: 100px;">Votos</th>
+          <th>${i18n.t("voting.hardcoded.option")}</th>
+          <th style="width: 100px;">${i18n.t("voting.hardcoded.votes")}</th>
           <th style="width: 80px;">%</th>
-          <th>Proporción</th>
+          <th>${i18n.t("voting.hardcoded.proportion")}</th>
         </tr>`;
 
       const sortedOptions = [...(poll.poll_options || [])].sort((a, b) => {
@@ -259,7 +261,7 @@ async function exportPDF(data: any, options: ExportOptions) {
         const percent = Math.round((poll.blankVotes / poll.totalVotes) * 100);
         html += `
           <tr>
-            <td><em>En blanco</em></td>
+            <td><em>${i18n.t("voting.hardcoded.blank")}</em></td>
             <td>${poll.blankVotes}</td>
             <td>${percent}%</td>
             <td>
@@ -274,10 +276,10 @@ async function exportPDF(data: any, options: ExportOptions) {
   }
 
   if (options.includeAttendance && data.attendance.length > 0) {
-    html += `<h2>Lista de Asistentes Acreditados</h2>`;
+    html += `<h2>${i18n.t("voting.hardcoded.accredited_attendees")}</h2>`;
     html += `<table>
       <tr>
-        <th>Nombre y Apellidos</th>
+        <th>${i18n.t("voting.hardcoded.full_name")}</th>
       </tr>`;
     data.attendance.forEach((a: any) => {
       html += `
@@ -290,12 +292,12 @@ async function exportPDF(data: any, options: ExportOptions) {
   }
 
   if (options.includeAudit && data.auditLogs.length > 0) {
-    html += `<h2>Registro de Auditoría (Participaciones)</h2>`;
+    html += `<h2>${i18n.t("voting.hardcoded.audit_log")}</h2>`;
     html += `<table>
       <tr>
-        <th>Votación</th>
-        <th>Votante</th>
-        <th>Fecha/Hora Voto</th>
+        <th>${i18n.t("voting.hardcoded.poll")}</th>
+        <th>${i18n.t("voting.hardcoded.voter")}</th>
+        <th>${i18n.t("voting.hardcoded.vote_time")}</th>
       </tr>`;
     data.auditLogs.forEach((log: any) => {
       html += `
@@ -311,7 +313,7 @@ async function exportPDF(data: any, options: ExportOptions) {
 
   html += `
       <div class="footer">
-        Generado por VotingApp el ${new Date().toLocaleString("es-ES")}
+        ${i18n.t("services.export.generated_by")}${new Date().toLocaleString("es-ES")}
       </div>
     </body>
     </html>
@@ -323,7 +325,8 @@ async function exportPDF(data: any, options: ExportOptions) {
   });
 
   const printedFile = new File(uri);
-  const newFile = new File(Paths.document, `Resultados_${data.meetingTitle.replace(/\s+/g, "_")}.pdf`);
+  const timestamp = Date.now();
+  const newFile = new File(Paths.document, `${i18n.t("services.export.results_prefix")}${data.meetingTitle.replace(/\s+/g, "_")}_${timestamp}.pdf`);
 
   await printedFile.move(newFile);
 
@@ -332,11 +335,11 @@ async function exportPDF(data: any, options: ExportOptions) {
 
 async function shareFile(uri: string, mimeType: string) {
   if (!(await Sharing.isAvailableAsync())) {
-    throw new Error("La función de compartir no está disponible en este dispositivo.");
+    throw new Error(i18n.t("services.export.share_unavailable"));
   }
 
   await Sharing.shareAsync(uri, {
     mimeType,
-    dialogTitle: "Compartir Resultados",
+    dialogTitle: i18n.t("services.export.share_title"),
   });
 }

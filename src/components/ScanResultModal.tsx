@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, Modal, TouchableOpacity, Image } from "react-native";
 import { CheckCircle2, AlertCircle, XCircle, User } from "lucide-react-native";
 
@@ -20,6 +21,7 @@ interface ScanResultModalProps {
 }
 
 export function ScanResultModal({ outcome, onClose }: ScanResultModalProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -83,7 +85,7 @@ export function ScanResultModal({ outcome, onClose }: ScanResultModalProps) {
                   {outcome.user.fullName}
                 </Text>
                 <Text className="text-muted-foreground text-sm font-mono mt-0.5">
-                  ID Acreditación verificada
+                  {t("meeting.organizer.scanner.scan_id_verified")}
                 </Text>
               </View>
             </View>
@@ -97,7 +99,7 @@ export function ScanResultModal({ outcome, onClose }: ScanResultModalProps) {
               outcome.type === "existing" ? "bg-secondary" : "bg-destructive"
             }`}
           >
-            <Text className="text-primary-foreground font-bold text-lg">Continuar</Text>
+            <Text className="text-primary-foreground font-bold text-lg">{t("meeting.organizer.scanner.continue_btn")}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
       </TouchableOpacity>

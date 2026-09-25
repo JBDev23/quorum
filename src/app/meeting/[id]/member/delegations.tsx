@@ -1,4 +1,5 @@
 import { useState, useEffect, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -43,6 +44,7 @@ function DelegationsShell({ children }: { children: ReactNode }) {
 }
 
 export default function MemberDelegationsScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { meetingId, groupId, status, allowDelegations } = useMeeting();
   const { user } = useAuth();
@@ -75,7 +77,7 @@ export default function MemberDelegationsScreen() {
         if (!cancelled) {
           alert(
             "Error",
-            toNetworkAwareMessage(err, "No se pudieron cargar las delegaciones.")
+            toNetworkAwareMessage(err, t("meeting.member.delegations.error_load"))
           );
         }
       } finally {
@@ -102,7 +104,7 @@ export default function MemberDelegationsScreen() {
     } catch (err) {
       alert(
         "Error",
-        toNetworkAwareMessage(err, "No se pudo crear la delegación.")
+        toNetworkAwareMessage(err, t("meeting.member.delegations.error_create"))
       );
       throw err;
     } finally {
@@ -119,7 +121,7 @@ export default function MemberDelegationsScreen() {
     } catch (err) {
       alert(
         "Error",
-        toNetworkAwareMessage(err, "No se pudo revocar la delegación.")
+        toNetworkAwareMessage(err, t("meeting.member.delegations.error_revoke"))
       );
     } finally {
       setSaving(false);
@@ -133,11 +135,10 @@ export default function MemberDelegationsScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <Text className="text-foreground text-3xl font-extrabold mb-2">
-          Delegaciones
+          {t("meeting.member.delegations.title")}
         </Text>
         <Text className="text-muted-foreground text-base mb-8">
-          Gestiona quién votará en tu nombre o revisa quién ha delegado su voto
-          en ti.
+          {t("meeting.member.delegations.desc")}
         </Text>
 
         {loading ? (
@@ -149,7 +150,7 @@ export default function MemberDelegationsScreen() {
             {/* Mi Delegación */}
             <View className="mb-8">
               <Text className="text-foreground font-semibold text-lg mb-4">
-                Mi Voto
+                {t("meeting.member.delegations.my_vote")}
               </Text>
               <View className="bg-card border border-border p-6 rounded-3xl items-center">
                 {delegatedTo ? (
@@ -158,14 +159,14 @@ export default function MemberDelegationsScreen() {
                       <CheckCircle2 size={32} color={colors.success} />
                     </View>
                     <Text className="text-foreground text-xl font-bold mb-2">
-                      Voto delegado
+                      {t("meeting.member.delegations.delegated_vote")}
                     </Text>
                     <Text className="text-muted-foreground text-center mb-6 px-4">
-                      Has delegado tu voto en{" "}
+                      {t("meeting.member.delegations.delegated_to")}{" "}
                       <Text className="font-bold text-foreground">
                         {delegatedTo.first_name} {delegatedTo.last_name}
                       </Text>
-                      . Esta persona podrá votar en tu nombre.
+                      {t("meeting.member.delegations.can_vote_for_you")}
                     </Text>
 
                     {canRevoke && (
@@ -181,15 +182,14 @@ export default function MemberDelegationsScreen() {
                           />
                         ) : (
                           <Text className="text-destructive font-bold text-base">
-                            Revocar delegación
+                            {t("meeting.member.delegations.revoke")}
                           </Text>
                         )}
                       </TouchableOpacity>
                     )}
                     {status === "active" && (
                       <Text className="text-muted-foreground text-center text-sm px-4">
-                        No se puede revocar la delegación mientras la reunión
-                        está en curso.
+                        {t("meeting.member.delegations.revoke_disabled")}
                       </Text>
                     )}
                   </>
@@ -199,11 +199,10 @@ export default function MemberDelegationsScreen() {
                       <Users size={32} color={colors.mutedForeground} />
                     </View>
                     <Text className="text-foreground text-xl font-bold mb-2">
-                      No has delegado tu voto
+                      {t("meeting.member.delegations.no_delegation")}
                     </Text>
                     <Text className="text-muted-foreground text-center mb-6 px-4">
-                      Si no puedes asistir a la reunión, puedes delegar tu voto
-                      en otro miembro para que vote por ti.
+                      {t("meeting.member.delegations.no_delegation_desc")}
                     </Text>
 
                     {status !== "closed" && (
@@ -214,7 +213,7 @@ export default function MemberDelegationsScreen() {
                       >
                         <UserPlus color={colors.primaryForeground} size={20} />
                         <Text className="text-primary-foreground font-bold text-base">
-                          Delegar mi voto
+                          {t("meeting.member.delegations.delegate_my_vote")}
                         </Text>
                       </TouchableOpacity>
                     )}
@@ -226,13 +225,13 @@ export default function MemberDelegationsScreen() {
             {/* Delegados en mí */}
             <View>
               <Text className="text-foreground font-semibold text-lg mb-4">
-                Han delegado en ti
+                {t("meeting.member.delegations.delegated_to_me")}
               </Text>
               <View className="bg-card border border-border p-6 rounded-3xl">
                 {delegatedToMe.length === 0 ? (
                   <View className="justify-center items-center py-10">
                     <Text className="text-muted-foreground text-center">
-                      Nadie ha delegado su voto en ti todavía.
+                      {t("meeting.member.delegations.nobody_delegated")}
                     </Text>
                   </View>
                 ) : (

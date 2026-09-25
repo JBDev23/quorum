@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import i18n from "@/lib/i18n";
 
 type DeleteAccountResponse = {
   ok?: boolean;
@@ -13,7 +14,7 @@ export async function deleteAccount(): Promise<void> {
   );
 
   if (error) {
-    throw new Error(error.message || "No se pudo eliminar la cuenta.");
+    throw new Error(error.message || i18n.t("services.account.delete_error"));
   }
 
   if (data?.error) {

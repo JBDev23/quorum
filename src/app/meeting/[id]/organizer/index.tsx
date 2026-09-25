@@ -1,5 +1,6 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { useMeeting } from "../_layout";
 import { MeetingExitButton } from "@/components/MeetingExitButton";
@@ -18,57 +19,56 @@ const PHASES_ORDER: MeetingStatus[] = [
   "closed",
 ];
 
-const HEADER_PROPS: Record<
-  MeetingStatus,
-  {
-    badge: string;
-    badgeColor: string;
-    dotColor: string;
-    bgColor: string;
-    description: string;
-  }
-> = {
-  draft: {
-    badge: "BORRADOR · CERRADA",
-    badgeColor: "text-warning",
-    dotColor: "bg-warning",
-    bgColor: "bg-warning/10",
-    description:
-      "Prepara todo antes de publicarla. Mientras esté en borrador, solo tú la ves.",
-  },
-  scheduled: {
-    badge: "PROGRAMADA",
-    badgeColor: "text-secondary",
-    dotColor: "bg-secondary",
-    bgColor: "bg-secondary/10",
-    description: "La reunión está programada y los miembros pueden verla.",
-  },
-  accreditation: {
-    badge: "ACREDITACIÓN",
-    badgeColor: "text-warning",
-    dotColor: "bg-warning",
-    bgColor: "bg-warning/10",
-    description: "Escanea los códigos QR de los miembros para acreditarlos.",
-  },
-  active: {
-    badge: "EN CURSO",
-    badgeColor: "text-success",
-    dotColor: "bg-success",
-    bgColor: "bg-success/10",
-    description:
-      "La reunión está activa. Los miembros acreditados pueden votar.",
-  },
-  closed: {
-    badge: "FINALIZADA",
-    badgeColor: "text-muted-foreground",
-    dotColor: "bg-muted-foreground",
-    bgColor: "bg-muted",
-    description: "La reunión ha finalizado y los resultados son definitivos.",
-  },
-};
-
 export default function OrganizerDashboard() {
+  const { t } = useTranslation();
   const { meetingId, groupId, status, updateStatus } = useMeeting();
+
+  const HEADER_PROPS: Record<
+    MeetingStatus,
+    {
+      badge: string;
+      badgeColor: string;
+      dotColor: string;
+      bgColor: string;
+      description: string;
+    }
+  > = {
+    draft: {
+      badge: t("meeting.organizer.dashboard.phase_draft"),
+      badgeColor: "text-warning",
+      dotColor: "bg-warning",
+      bgColor: "bg-warning/10",
+      description: t("meeting.organizer.dashboard.desc_draft"),
+    },
+    scheduled: {
+      badge: t("meeting.organizer.dashboard.phase_scheduled"),
+      badgeColor: "text-secondary",
+      dotColor: "bg-secondary",
+      bgColor: "bg-secondary/10",
+      description: t("meeting.organizer.dashboard.desc_scheduled"),
+    },
+    accreditation: {
+      badge: t("meeting.organizer.dashboard.phase_accreditation"),
+      badgeColor: "text-warning",
+      dotColor: "bg-warning",
+      bgColor: "bg-warning/10",
+      description: t("meeting.organizer.dashboard.desc_accreditation"),
+    },
+    active: {
+      badge: t("meeting.organizer.dashboard.phase_active"),
+      badgeColor: "text-success",
+      dotColor: "bg-success",
+      bgColor: "bg-success/10",
+      description: t("meeting.organizer.dashboard.desc_active"),
+    },
+    closed: {
+      badge: t("meeting.organizer.dashboard.phase_closed"),
+      badgeColor: "text-muted-foreground",
+      dotColor: "bg-muted-foreground",
+      bgColor: "bg-muted",
+      description: t("meeting.organizer.dashboard.desc_closed"),
+    },
+  };
 
   const headerInfo = HEADER_PROPS[status];
   const currentPhaseIndex = PHASES_ORDER.indexOf(status);
@@ -88,7 +88,7 @@ export default function OrganizerDashboard() {
           <MeetingExitButton className="bg-white/80" />
         </View>
         <Text className="text-3xl font-extrabold text-foreground mb-3">
-          Panel de Control
+          {t("meeting.organizer.dashboard.title")}
         </Text>
         <Text className="text-muted-foreground text-[15px] leading-6">
           {headerInfo.description}

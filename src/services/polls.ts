@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import i18n from "@/lib/i18n";
 
 export type PollType = "yes_no" | "multiple_choice";
 export type PollStatus = "draft" | "active" | "closed";
@@ -18,12 +19,8 @@ export type Poll = {
     poll_options?: PollOption[];
 };
 
-export const POLL_TYPE_LABELS: Record<PollType, string> = {
-    yes_no: "Sí / No",
-    multiple_choice: "Opción múltiple",
-};
 
-const YES_NO_OPTIONS = ["Sí", "No"];
+
 
 export async function fetchPolls(meetingId: string): Promise<Poll[]> {
     const { data, error } = await supabase
@@ -32,7 +29,7 @@ export async function fetchPolls(meetingId: string): Promise<Poll[]> {
         .eq("meeting_id", meetingId)
         .order("created_at", { ascending: true });
 
-    if (error) throw new Error("No se pudieron cargar las encuestas");
+    if (error) throw new Error(i18n.t("services.polls.load_polls_error"));
     return data as Poll[];
 }
 
@@ -45,7 +42,7 @@ export async function fetchClosedPolls(meetingId: string): Promise<Poll[]> {
         .eq("status", "closed")
         .order("created_at", { ascending: false });
 
-    if (error) throw new Error("No se pudieron cargar los resultados");
+    if (error) throw new Error(i18n.t("services.polls.load_results_error"));
     return data as Poll[];
 }
 
@@ -65,18 +62,18 @@ export async function createPoll({
 }: CreatePollInput): Promise<Poll> {
     const trimmedTitle = title.trim();
     if (trimmedTitle.length < 5) {
-        throw new Error("El título debe tener al menos 5 caracteres");
+        throw new Error(i18n.t("services.polls.title_length_error"));
     }
 
     const optionTexts =
         type === "yes_no"
-            ? YES_NO_OPTIONS
+            ? [i18n.t("services.polls.yes"), i18n.t("services.polls.no")]
             : (options ?? [])
                 .map((o) => o.trim())
                 .filter(Boolean);
 
     if (type === "multiple_choice" && optionTexts.length < 2) {
-        throw new Error("Añade al menos 2 opciones");
+        throw new Error(i18n.t("services.polls.min_options_error"));
     }
 
     const { data: pollData, error: pollError } = await supabase
@@ -92,7 +89,7 @@ export async function createPoll({
 
     if (pollError || !pollData) {
         throw new Error(
-            pollError?.message ?? "No se pudo crear la pregunta"
+            pollError?.message ?? i18n.t("services.polls.create_poll_error")
         );
     }
 
@@ -103,7 +100,7 @@ export async function createPoll({
 
     if (optionsError) {
         await supabase.from("polls").delete().eq("id", pollData.id);
-        throw new Error("No se pudieron crear las opciones de la pregunta");
+        throw new Error(i18n.t("services.polls.create_options_error"));
     }
 
     return { ...(pollData as Poll), poll_options: optionsData as PollOption[] };
@@ -111,7 +108,7 @@ export async function createPoll({
 
 export async function deletePoll(pollId: string): Promise<void> {
     const { error } = await supabase.from("polls").delete().eq("id", pollId);
-    if (error) throw new Error("No se pudo eliminar la pregunta");
+    if (error) throw new Error(i18n.t("services.polls.delete_error"));
 }
 
 /** Activate or close a poll. Activating closes any other active poll in the meeting. */
@@ -127,7 +124,7 @@ export async function updatePollStatus(
             .single();
 
         if (fetchError || !poll) {
-            throw new Error("No se encontró la encuesta");
+            throw new Error(i18n.t("services.polls.not_found"));
         }
 
         const { error: closeError } = await supabase
@@ -138,7 +135,7 @@ export async function updatePollStatus(
             .neq("id", pollId);
 
         if (closeError) {
-            throw new Error("No se pudieron cerrar las votaciones anteriores");
+            throw new Error(i18n.t("services.polls.close_previous_error"));
         }
     }
 
@@ -147,7 +144,7 @@ export async function updatePollStatus(
         .update({ status })
         .eq("id", pollId);
 
-    if (error) throw new Error(`No se pudo cambiar el estado a ${status}`);
+    if (error) throw new Error(i18n.t("services.polls.update_status_error", { status }));
 }
 
 export async function getPollRealtimeStats(pollId: string, meetingId: string) {
@@ -171,7 +168,7 @@ export async function getPollRealtimeStats(pollId: string, meetingId: string) {
     ]);
 
     if (totalError || delegationsError || votesError) {
-        throw new Error("Error al calcular estadísticas");
+        throw new Error(i18n.t("services.polls.stats_error"));
     }
 
     const accreditedIds = new Set(
@@ -205,7 +202,7 @@ export async function getPollResults(pollId: string) {
     .select("option_id, is_blank")
     .eq("poll_id", pollId);
 
-  if (error) throw new Error("No se pudieron cargar los resultados");
+  if (error) throw new Error(i18n.t("services.polls.load_results_error"));
 
   const results: Record<string, number> = {};
   let blankVotes = 0;

@@ -21,6 +21,7 @@ import {
 } from "@/services/meetings";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { AttendanceListSkeleton } from "@/components/skeletons/AttendanceListSkeleton";
+import { useTranslation } from "react-i18next";
 
 type AttendanceStatProps = {
   meetingId: string;
@@ -34,6 +35,7 @@ export function AttendanceStat({
   refreshKey,
 }: AttendanceStatProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -141,16 +143,16 @@ export function AttendanceStat({
           <Users size={24} color={colors.secondary} />
         </View>
         <View className="flex-1">
-          <Text className="text-foreground font-bold text-lg">Acreditados</Text>
+          <Text className="text-foreground font-bold text-lg">{t("meeting.organizer.components.attendance.accredited")}</Text>
           {loading ? (
             <ActivityIndicator size="small" color="#a3a3a3" className="mt-1 self-start" />
           ) : stats ? (
             <Text className="text-muted-foreground text-sm">
-              {stats.accredited} de {stats.totalMembers} miembros del grupo
+              {t("meeting.organizer.components.attendance.members_count", { accredited: stats.accredited, total: stats.totalMembers })}
             </Text>
           ) : (
             <Text className="text-muted-foreground text-sm">
-              No se pudo cargar el contador
+              {t("meeting.organizer.components.attendance.error_load")}
             </Text>
           )}
         </View>
@@ -179,10 +181,10 @@ export function AttendanceStat({
             <View className="p-6 border-b border-border flex-row justify-between items-center bg-card z-10">
               <View>
                 <Text className="text-foreground text-xl font-bold">
-                  Control de Asistencia
+                  {t("meeting.organizer.components.attendance.modal_title")}
                 </Text>
                 <Text className="text-muted-foreground">
-                  {stats?.accredited} / {stats?.totalMembers} acreditados
+                  {t("meeting.organizer.components.attendance.modal_subtitle", { accredited: stats?.accredited, total: stats?.totalMembers })}
                 </Text>
               </View>
               <TouchableOpacity
@@ -235,14 +237,14 @@ export function AttendanceStat({
                         <>
                           <CheckCircle2 size={14} color="#22c55e" />
                           <Text className="text-success text-xs font-bold">
-                            PRESENTE
+                            {t("meeting.organizer.components.attendance.status_present")}
                           </Text>
                         </>
                       ) : (
                         <>
                           <Clock size={14} color="#a3a3a3" />
                           <Text className="text-muted-foreground text-xs font-bold">
-                            FALTA
+                            {t("meeting.organizer.components.attendance.status_absent")}
                           </Text>
                         </>
                       )}
@@ -255,10 +257,10 @@ export function AttendanceStat({
                       <Users size={32} color="#a3a3a3" />
                     </View>
                     <Text className="text-foreground text-[19px] font-bold text-center mb-2">
-                      Sin miembros
+                      {t("meeting.organizer.components.attendance.no_members")}
                     </Text>
                     <Text className="text-muted-foreground text-center text-[15px] leading-6 px-4">
-                      No hay miembros en este grupo.
+                      {t("meeting.organizer.components.attendance.no_members_desc")}
                     </Text>
                   </View>
                 }

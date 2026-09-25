@@ -24,6 +24,7 @@ import {
   Camera,
   Circle,
 } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { alert } from "@/components/Alert";
 import { useAuth } from "@/lib/auth";
@@ -42,6 +43,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { ProfileSkeleton } from "@/components/skeletons/ProfileSkeleton";
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const colors = useThemeColors();
 
@@ -109,8 +111,8 @@ export default function ProfileScreen() {
       setIsEditing(false);
     } catch (error) {
       alert(
-        "Error",
-        error instanceof Error ? error.message : "No se pudo actualizar.",
+        t("common.error"),
+        error instanceof Error ? error.message : t("main.profile.error_update"),
       );
     } finally {
       setIsSaving(false);
@@ -140,8 +142,8 @@ export default function ProfileScreen() {
         setProfile((prev) => (prev ? { ...prev, avatar_url: newUrl } : null));
       } catch (error) {
         alert(
-          "Error",
-          error instanceof Error ? error.message : "Error al subir la imagen",
+          t("common.error"),
+          error instanceof Error ? error.message : t("main.profile.error_upload_avatar"),
         );
       } finally {
         setIsUploadingAvatar(false);
@@ -150,9 +152,9 @@ export default function ProfileScreen() {
   };
 
   const handleSignOut = () => {
-    alert("Cerrar Sesión", "¿Seguro que quieres salir?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Salir", style: "destructive", onPress: signOut },
+    alert(t("main.profile.signout_title"), t("main.profile.signout_desc"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("main.profile.signout_btn"), style: "destructive", onPress: signOut },
     ]);
   };
 
@@ -162,7 +164,7 @@ export default function ProfileScreen() {
         <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className="bg-background" stickyHeaderIndices={[0]}>
           <View className="w-full bg-background px-6 pt-6 pb-4 z-10">
             <Text className="text-3xl font-extrabold text-foreground">
-              Mi Perfil
+              {t("main.profile.title")}
             </Text>
           </View>
 
@@ -179,7 +181,7 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className="bg-background" stickyHeaderIndices={[0]}>
         <View className="w-full bg-background px-6 pt-6 pb-4 z-10">
           <Text className="text-3xl font-extrabold text-foreground">
-            Mi Perfil
+            {t("main.profile.title")}
           </Text>
         </View>
 
@@ -236,7 +238,7 @@ export default function ProfileScreen() {
                   onChangeText={(text) =>
                     setEditForm({ ...editForm, firstName: text })
                   }
-                  placeholder="Nombre"
+                  placeholder={t("main.profile.placeholder_firstname")}
                   placeholderTextColor="#9ca3af"
                   className="bg-slate-50 text-foreground font-medium px-4 py-3 rounded-[16px] border border-border"
                 />
@@ -245,7 +247,7 @@ export default function ProfileScreen() {
                   onChangeText={(text) =>
                     setEditForm({ ...editForm, lastName: text })
                   }
-                  placeholder="Apellidos"
+                  placeholder={t("main.profile.placeholder_lastname")}
                   placeholderTextColor="#9ca3af"
                   className="bg-slate-50 text-foreground font-medium px-4 py-3 rounded-[16px] border border-border"
                 />
@@ -256,7 +258,7 @@ export default function ProfileScreen() {
                     className="flex-1 bg-slate-100 py-3 rounded-[16px] flex-row justify-center items-center gap-2"
                   >
                     <X size={18} color="#64748b" />
-                    <Text className="text-slate-500 font-bold">Cancelar</Text>
+                    <Text className="text-slate-500 font-bold">{t("main.profile.btn_cancel")}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleSaveProfile}
@@ -268,7 +270,7 @@ export default function ProfileScreen() {
                     ) : (
                       <>
                         <Check size={18} color="white" />
-                        <Text className="text-primary-foreground font-bold">Guardar</Text>
+                        <Text className="text-primary-foreground font-bold">{t("main.profile.btn_save")}</Text>
                       </>
                     )}
                   </TouchableOpacity>
@@ -278,14 +280,14 @@ export default function ProfileScreen() {
               <>
                 <View className="flex-row items-center justify-center gap-2 flex-wrap px-4">
                   <Text className="text-2xl font-extrabold text-foreground text-center">
-                    {[profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Configura tu nombre"}
+                    {[profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || t("main.profile.setup_name")}
                   </Text>
 
                   {profile?.is_premium && (
                     <View className="bg-amber-100 px-2 py-1 rounded-md border border-amber-200 flex-row items-center gap-1 mt-1">
                       <Award size={12} color="#d97706" />
                       <Text className="text-amber-600 text-xs font-extrabold uppercase tracking-widest">
-                        Premium
+                        {t("main.profile.premium_badge")}
                       </Text>
                     </View>
                   )}
@@ -302,7 +304,7 @@ export default function ProfileScreen() {
           <View className="flex-row items-center gap-2 mb-4 px-1 mt-2">
             <Circle size={8} fill="#10b981" color="#10b981" />
             <Text className="text-[11px] font-bold text-slate-500 tracking-widest uppercase">
-              Tu Actividad
+              {t("main.profile.section_activity")}
             </Text>
           </View>
 
@@ -315,7 +317,7 @@ export default function ProfileScreen() {
                 {stats.groups}
               </Text>
               <Text className="text-muted-foreground text-xs uppercase tracking-wider font-bold">
-                Grupos
+                {t("main.profile.stat_groups")}
               </Text>
             </View>
 
@@ -327,7 +329,7 @@ export default function ProfileScreen() {
                 {stats.meetings}
               </Text>
               <Text className="text-muted-foreground text-xs uppercase tracking-wider font-bold">
-                Asistencias
+                {t("main.profile.stat_attendances")}
               </Text>
             </View>
 
@@ -338,10 +340,10 @@ export default function ProfileScreen() {
                 </View>
                 <View>
                   <Text className="text-foreground font-extrabold text-lg">
-                    Decisiones tomadas
+                    {t("main.profile.stat_votes_title")}
                   </Text>
                   <Text className="text-muted-foreground font-medium text-sm">
-                    Votos emitidos en asambleas
+                    {t("main.profile.stat_votes_desc")}
                   </Text>
                 </View>
               </View>
@@ -364,10 +366,10 @@ export default function ProfileScreen() {
                 </View>
                 <View>
                   <Text className="text-foreground font-extrabold text-base">
-                    Caja Fuerte
+                    {t("main.profile.safe_title")}
                   </Text>
                   <Text className="text-muted-foreground font-medium text-sm">
-                    Tus recibos de votación
+                    {t("main.profile.safe_desc")}
                   </Text>
                 </View>
               </View>
@@ -384,10 +386,10 @@ export default function ProfileScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-amber-700 font-extrabold text-base">
-                    Mejorar a Premium
+                    {t("main.profile.premium_title")}
                   </Text>
                   <Text className="text-amber-600/80 font-medium text-sm">
-                    Desbloquea funciones avanzadas
+                    {t("main.profile.premium_desc")}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -402,7 +404,7 @@ export default function ProfileScreen() {
                   <LogOut size={20} color="#ef4444" />
                 </View>
                 <Text className="text-destructive font-extrabold text-base">
-                  Cerrar Sesión
+                  {t("main.profile.btn_signout")}
                 </Text>
               </View>
             </TouchableOpacity>

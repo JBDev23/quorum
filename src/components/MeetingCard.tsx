@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Href, router } from "expo-router";
 import { User, MessageCircle } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 // 1. Definimos las props fuertemente tipadas basadas en tu BD
 export interface MeetingCardProps {
@@ -21,6 +22,8 @@ export function MeetingCard({
   status,
   dateText,
 }: MeetingCardProps) {
+  const { t } = useTranslation();
+
   // Helpers para los colores y textos del estado
   const getStatusConfig = () => {
     switch (status) {
@@ -29,35 +32,35 @@ export function MeetingCard({
           color: "bg-emerald-500",
           text: "text-emerald-600",
           bg: "bg-emerald-100",
-          label: "En curso",
+          label: t("components.meetingCard.status_active"),
         };
       case "accreditation":
         return {
           color: "bg-yellow-500",
           text: "text-yellow-600",
           bg: "bg-yellow-100",
-          label: "Acreditando",
+          label: t("components.meetingCard.status_accreditation"),
         };
       case "draft":
         return {
           color: "bg-muted-foreground",
           text: "text-muted-foreground",
           bg: "bg-muted",
-          label: "Borrador",
+          label: t("components.meetingCard.status_draft"),
         };
       case "scheduled":
         return {
           color: "bg-sky-500",
           text: "text-sky-600",
           bg: "bg-sky-100",
-          label: "Programada",
+          label: t("components.meetingCard.status_scheduled"),
         };
       case "closed":
         return {
           color: "bg-destructive",
           text: "text-destructive",
           bg: "bg-destructive/20",
-          label: "Finalizada",
+          label: t("components.meetingCard.status_closed"),
         };
     }
   };
@@ -114,7 +117,7 @@ export function MeetingCard({
                 : "text-muted-foreground text-xs font-medium"
             }
           >
-            {isOrganizer ? "Organizador" : "Participante"}
+            {isOrganizer ? t("components.meetingCard.role_organizer") : t("components.meetingCard.role_participant")}
           </Text>
         </View>
       </View>

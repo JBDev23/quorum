@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { CalendarClock, ListTodo, Play } from "lucide-react-native";
 
@@ -17,6 +18,7 @@ type DraftPhaseProps = {
 };
 
 export function DraftPhase({ meetingId, onStatusUpdated }: DraftPhaseProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { isUpdating, confirmAndApply } = useMeetingStatusChange(
     meetingId,
@@ -25,19 +27,17 @@ export function DraftPhase({ meetingId, onStatusUpdated }: DraftPhaseProps) {
 
   const handleSchedule = () => {
     confirmAndApply("scheduled", {
-      title: "Programar reunión",
-      message:
-        "Los participantes verán la fecha de la reunión, pero aún no podrán acreditar ni votar. ¿Continuar?",
-      confirmLabel: "Sí, programar",
+      title: t("meeting.organizer.phases.draft.schedule_title"),
+      message: t("meeting.organizer.phases.draft.schedule_msg"),
+      confirmLabel: t("meeting.organizer.phases.draft.schedule_confirm"),
     });
   };
 
   const handleOpenDoors = () => {
     confirmAndApply("accreditation", {
-      title: "Abrir Acreditaciones",
-      message:
-        "Los participantes podrán ver la reunión y empezar a acreditarse con su código QR. ¿Continuar?",
-      confirmLabel: "Sí, abrir puertas",
+      title: t("meeting.organizer.phases.draft.open_doors_title"),
+      message: t("meeting.organizer.phases.draft.open_doors_msg"),
+      confirmLabel: t("meeting.organizer.phases.draft.open_doors_confirm"),
     });
   };
 
@@ -46,11 +46,11 @@ export function DraftPhase({ meetingId, onStatusUpdated }: DraftPhaseProps) {
       <View className="gap-4 mb-8">
 
         <PanelActionRow
-          title="Preguntas y Encuestas"
-          subtitle="Redacta lo que se va a votar"
+          title={t("meeting.organizer.phases.draft.polls_title")}
+          subtitle={t("meeting.organizer.phases.draft.polls_subtitle")}
           icon={<ListTodo size={24} color={colors.secondary} />}
           onPress={() =>
-            router.push(`/meeting/${meetingId}/organizer/surveys`)
+            router.push(`/meeting/${meetingId}/organizer/polls`)
           }
         />
 
@@ -60,11 +60,11 @@ export function DraftPhase({ meetingId, onStatusUpdated }: DraftPhaseProps) {
       </View>
 
       <PhasePrimaryButton
-        label="Programar reunión"
+        label={t("meeting.organizer.phases.draft.schedule_btn")}
         onPress={handleSchedule}
         loading={isUpdating}
         icon={<CalendarClock color="white" size={20} />}
-        hint="Al programarla, los participantes verán cuándo será, sin poder hacer nada todavía."
+        hint={t("meeting.organizer.phases.draft.schedule_hint")}
       />
 
       <TouchableOpacity
@@ -78,7 +78,7 @@ export function DraftPhase({ meetingId, onStatusUpdated }: DraftPhaseProps) {
           <View className="flex-row items-center gap-2">
             <Play size={16} color="#a3a3a3" />
             <Text className="text-muted-foreground font-medium">
-              Saltar y abrir acreditaciones
+              {t("meeting.organizer.phases.draft.skip_to_accreditation")}
             </Text>
           </View>
         )}

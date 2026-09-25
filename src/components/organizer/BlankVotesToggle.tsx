@@ -7,6 +7,7 @@ import {
   updateAllowBlankVotes,
 } from "@/services/meetings";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useTranslation } from "react-i18next";
 
 type BlankVotesToggleProps = {
   meetingId: string;
@@ -18,6 +19,7 @@ export function BlankVotesToggle({
   editable = true,
 }: BlankVotesToggleProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,9 +68,9 @@ export function BlankVotesToggle({
           )}
         </View>
         <View className="flex-1">
-          <Text className="text-foreground font-bold text-lg">Voto en blanco</Text>
+          <Text className="text-foreground font-bold text-lg">{t("meeting.organizer.components.blankVotes.title")}</Text>
           <Text className="text-muted-foreground text-sm">
-            Permite depositar un voto sin elegir opción
+            {t("meeting.organizer.components.blankVotes.description")}
           </Text>
         </View>
       </View>

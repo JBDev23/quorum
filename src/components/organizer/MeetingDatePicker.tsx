@@ -9,14 +9,15 @@ import {
   updateMeetingDate,
 } from "@/services/meetings";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useTranslation } from "react-i18next";
 
 type MeetingDatePickerProps = {
   meetingId: string;
   editable?: boolean;
 };
 
-function formatFriendlyDate(date: Date) {
-  return date.toLocaleString("es-ES", {
+function formatFriendlyDate(date: Date, locale: string) {
+  return date.toLocaleString(locale, {
     weekday: "short",
     day: "2-digit",
     month: "short",
@@ -30,6 +31,7 @@ export function MeetingDatePicker({
   editable = true,
 }: MeetingDatePickerProps) {
   const colors = useThemeColors();
+  const { t, i18n } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isUpdatingDate, setIsUpdatingDate] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -111,8 +113,8 @@ export function MeetingDatePicker({
   return (
     <View>
       <PanelActionRow
-        title="Fecha y Hora"
-        subtitle={formatFriendlyDate(currentDate)}
+        title={t("meeting.organizer.components.meetingDate.title")}
+        subtitle={formatFriendlyDate(currentDate, i18n.language)}
         icon={<Calendar size={24} color={colors.secondary} />}
         onPress={editable ? openPicker : undefined}
         disabled={!editable}

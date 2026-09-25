@@ -12,6 +12,7 @@ import { openPremiumPaywall } from "@/lib/navigation";
 import { alert } from "@/components/Alert";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useMeeting } from "@/app/meeting/[id]/_layout";
+import { useTranslation } from "react-i18next";
 
 type DelegationsToggleProps = {
   meetingId: string;
@@ -22,6 +23,7 @@ export function DelegationsToggle({
   meetingId,
   editable = true,
 }: DelegationsToggleProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { user } = useAuth();
   const { updateAllowDelegations: syncAllowDelegations } = useMeeting();
@@ -106,10 +108,10 @@ export function DelegationsToggle({
         </View>
         <View className="flex-1">
           <Text className="text-foreground font-bold text-lg">
-            Delegación de votos
+            {t("voting.hardcoded.vote_delegation")}
           </Text>
           <Text className="text-muted-foreground text-sm">
-            Permite que los participantes deleguen su voto en otros miembros
+            {t("voting.hardcoded.vote_delegation_desc")}
           </Text>
         </View>
       </View>

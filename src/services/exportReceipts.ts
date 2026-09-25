@@ -3,6 +3,7 @@ import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 import { getVoteReceipts } from "@/services/profile";
+import i18n from "@/lib/i18n";
 
 function escapeCsv(value: string): string {
   if (/[",\n\r]/.test(value)) {
@@ -16,11 +17,11 @@ export async function exportVoteReceiptsCsv(userId: string): Promise<void> {
   const receipts = await getVoteReceipts(userId);
 
   if (receipts.length === 0) {
-    throw new Error("EMPTY");
+    throw new Error(i18n.t("services.exportReceipts.empty"));
   }
 
   const rows = receipts.map((r) => {
-    const receipt = r.receipt_hash || "no_disponible_en_este_dispositivo";
+    const receipt = r.receipt_hash || i18n.t("services.exportReceipts.unavailable_on_device");
     const fecha = new Date(r.voted_at).toISOString();
     return [
       escapeCsv(r.meeting_title),
@@ -34,7 +35,7 @@ export async function exportVoteReceiptsCsv(userId: string): Promise<void> {
 
   const available = await Sharing.isAvailableAsync();
   if (!available) {
-    throw new Error("Sharing is not available on this device");
+    throw new Error(i18n.t("services.exportReceipts.share_unavailable"));
   }
 
   const file = new File(Paths.cache, `caja-fuerte-${Date.now()}.csv`);
@@ -46,7 +47,7 @@ export async function exportVoteReceiptsCsv(userId: string): Promise<void> {
 
   await Sharing.shareAsync(file.uri, {
     mimeType: "text/csv",
-    dialogTitle: "Exportar Caja Fuerte",
+    dialogTitle: i18n.t("services.exportReceipts.export_vault"),
     UTI: "public.comma-separated-values-text",
   });
 }

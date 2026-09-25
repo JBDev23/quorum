@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { ListTodo, CheckCircle2 } from "lucide-react-native";
 
@@ -12,6 +13,7 @@ type ClosedPhaseProps = {
 };
 
 export function ClosedPhase({ meetingId, groupId }: ClosedPhaseProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
 
   return (
@@ -22,22 +24,21 @@ export function ClosedPhase({ meetingId, groupId }: ClosedPhaseProps) {
             <CheckCircle2 size={28} color="#ef4444" />
           </View>
           <Text className="text-foreground font-bold text-lg text-center mb-1">
-            Reunión finalizada
+            {t("meeting.organizer.phases.closed.results_title")}
           </Text>
           <Text className="text-muted-foreground text-sm text-center">
-            Ya no se pueden acreditar participantes ni abrir nuevas
-            votaciones. Consulta el resumen y los resultados.
+            {t("meeting.organizer.phases.closed.results_subtitle")}
           </Text>
         </View>
 
         <AttendanceStat meetingId={meetingId} groupId={groupId} />
 
         <PanelActionRow
-          title="Encuestas y resultados"
-          subtitle="Revisa lo que se votó"
+          title={t("meeting.organizer.tabs.polls")}
+          subtitle={t("meeting.organizer.phases.closed.results_subtitle")}
           icon={<ListTodo size={24} color={colors.secondary} />}
           onPress={() =>
-            router.push(`/meeting/${meetingId}/organizer/surveys`)
+            router.push(`/meeting/${meetingId}/organizer/polls`)
           }
         />
       </View>

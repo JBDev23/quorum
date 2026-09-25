@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 
-export function SurveysSkeleton() {
+export function PollsSkeleton() {
   const fadeAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {

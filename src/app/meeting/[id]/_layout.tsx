@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -84,6 +85,7 @@ function useMeetingRouteId(): RouteIdResult {
 }
 
 export default function MeetingLayout() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const routeId = useMeetingRouteId();
   const meetingId =
@@ -103,7 +105,7 @@ export default function MeetingLayout() {
 
     if (routeStatus === "invalid") {
       setMeetingData(null);
-      setError("Reunión no encontrada.");
+      setError(t("meeting.layout.not_found"));
       setLoading(false);
       return;
     }
@@ -140,18 +142,18 @@ export default function MeetingLayout() {
           .single();
 
         if (fetchError || !data) {
-          throw new Error("No tienes acceso a esta reunión o no existe.");
+          throw new Error(t("meeting.layout.no_access"));
         }
 
         const rawRole = (data.groups as { group_members?: { role: unknown }[] })
           ?.group_members?.[0]?.role;
 
         if (!isMeetingRole(rawRole)) {
-          throw new Error("No se pudo determinar tu rol en esta reunión.");
+          throw new Error(t("meeting.layout.unknown_role"));
         }
 
         if (!isMeetingStatus(data.status)) {
-          throw new Error("Estado de reunión desconocido.");
+          throw new Error(t("meeting.layout.unknown_status"));
         }
 
         if (!cancelled) {
@@ -167,7 +169,7 @@ export default function MeetingLayout() {
       } catch (err) {
         if (!cancelled) {
           setMeetingData(null);
-          setError(err instanceof Error ? err.message : "Acceso denegado");
+          setError(err instanceof Error ? err.message : t("meeting.layout.access_denied"));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -245,17 +247,17 @@ export default function MeetingLayout() {
     return (
       <View className="flex-1 bg-background justify-center items-center px-6">
         <Text className="text-destructive text-xl font-bold mb-2">
-          Acceso Denegado
+          {t("meeting.layout.access_denied")}
         </Text>
         <Text className="text-muted-foreground text-center mb-8">
-          {error ?? "No se pudo cargar la reunión."}
+          {error ?? t("meeting.layout.load_error")}
         </Text>
         <TouchableOpacity
           onPress={() => router.replace("/(main)")}
           className="bg-muted px-6 py-3 rounded-full flex-row items-center gap-2"
         >
           <ArrowLeft color="white" size={20} />
-          <Text className="text-foreground font-semibold">Volver al Inicio</Text>
+          <Text className="text-foreground font-semibold">{t("meeting.layout.back_home")}</Text>
         </TouchableOpacity>
       </View>
     );

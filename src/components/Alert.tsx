@@ -23,6 +23,7 @@ import {
 } from "lucide-react-native";
 
 import { useThemeColors } from "@/theme/useThemeColors";
+import i18n from "@/lib/i18n";
 
 export type AlertButtonStyle = "default" | "cancel" | "destructive";
 
@@ -115,7 +116,7 @@ function AlertDialog({
 
   const buttons = useMemo(() => {
     if (config.buttons && config.buttons.length > 0) return config.buttons;
-    return [{ text: "Entendido", style: "default" as const }];
+    return [{ text: i18n.t("common.understood"), style: "default" as const }];
   }, [config.buttons]);
 
   const variant = inferVariant(config);
@@ -168,7 +169,7 @@ function AlertDialog({
             onPress={onDismiss}
             className="absolute inset-0"
             accessibilityRole="button"
-            accessibilityLabel="Cerrar"
+            accessibilityLabel={i18n.t("common.close")}
           />
         ) : null}
 
@@ -285,12 +286,12 @@ export function confirm(options: {
   return new Promise((resolve) => {
     alert(options.title, options.message, [
       {
-        text: options.cancelLabel ?? "Cancelar",
+        text: options.cancelLabel ?? i18n.t("common.cancel"),
         style: "cancel",
         onPress: () => resolve(false),
       },
       {
-        text: options.confirmLabel ?? "Confirmar",
+        text: options.confirmLabel ?? i18n.t("common.confirm"),
         style: options.destructive ? "destructive" : "default",
         onPress: () => resolve(true),
       },

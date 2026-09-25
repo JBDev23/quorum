@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { Play, ListTodo, QrCode } from "lucide-react-native";
 
@@ -24,6 +25,7 @@ export function AccreditationPhase({
   groupId,
   onStatusUpdated,
 }: AccreditationPhaseProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { user } = useAuth();
   const { isUpdating, confirmAndApply } = useMeetingStatusChange(
@@ -52,10 +54,9 @@ export function AccreditationPhase({
 
   const handleStartMeeting = () => {
     confirmAndApply("active", {
-      title: "Iniciar reunión",
-      message:
-        "Los participantes acreditados podrán votar. ¿Empezar la reunión?",
-      confirmLabel: "Sí, iniciar",
+      title: t("meeting.organizer.phases.accreditation.start_title"),
+      message: t("meeting.organizer.phases.accreditation.start_msg"),
+      confirmLabel: t("meeting.organizer.phases.accreditation.start_confirm"),
     });
   };
 
@@ -63,8 +64,7 @@ export function AccreditationPhase({
     <View>
       <View className="gap-4 mb-8">
         <Text className="text-muted-foreground mb-2">
-          Las puertas están abiertas. Usa el escáner para acreditar a quien
-          llegue con su QR. Tú ya estás acreditado automáticamente.
+          {t("meeting.organizer.dashboard.desc_accreditation")}
         </Text>
 
         <AttendanceStat
@@ -74,8 +74,8 @@ export function AccreditationPhase({
         />
 
         <PanelActionRow
-          title="Escáner QR"
-          subtitle="Acreditar participantes"
+          title={t("meeting.organizer.phases.accreditation.scanner_title")}
+          subtitle={t("meeting.organizer.phases.accreditation.scanner_subtitle")}
           icon={<QrCode size={24} color={colors.secondary} />}
           onPress={() =>
             router.push(`/meeting/${meetingId}/organizer/scanner`)
@@ -83,11 +83,11 @@ export function AccreditationPhase({
         />
 
         <PanelActionRow
-          title="Preguntas y Encuestas"
-          subtitle="Aún puedes editar el orden del día"
+          title={t("meeting.organizer.phases.draft.polls_title")}
+          subtitle={t("meeting.organizer.phases.draft.polls_subtitle")}
           icon={<ListTodo size={24} color={colors.secondary} />}
           onPress={() =>
-            router.push(`/meeting/${meetingId}/organizer/surveys`)
+            router.push(`/meeting/${meetingId}/organizer/polls`)
           }
         />
 
@@ -95,11 +95,11 @@ export function AccreditationPhase({
       </View>
 
       <PhasePrimaryButton
-        label="Iniciar reunión"
+        label={t("meeting.organizer.phases.accreditation.start_btn")}
         onPress={handleStartMeeting}
         loading={isUpdating}
         icon={<Play color="white" size={20} fill="white" />}
-        hint="Al iniciar, se abren las urnas de votación para los acreditados."
+        hint={t("meeting.organizer.phases.accreditation.start_hint")}
       />
     </View>
   );

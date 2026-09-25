@@ -356,7 +356,7 @@ async function main() {
   if (!serviceKey) {
     throw new Error(
       "Falta SUPABASE_SERVICE_ROLE_KEY en .env.\n" +
-        "Cópiala desde Supabase Dashboard → Project Settings → API → service_role."
+      "Cópiala desde Supabase Dashboard → Project Settings → API → service_role."
     );
   }
 

@@ -1,4 +1,5 @@
 import "../global.css";
+import "@/lib/i18n";
 
 import { useEffect } from "react";
 import { ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
@@ -24,29 +25,31 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { PreferencesProvider } from "@/lib/preferences";
 import { configurePurchases } from "@/lib/purchases";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useTranslation } from "react-i18next";
 
 // Evita que el splash screen se oculte automáticamente
 SplashScreen.preventAutoHideAsync();
 
 export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  const { t } = useTranslation();
   return (
     <View className="flex-1 bg-background items-center justify-center p-6">
       <View className="bg-destructive/10 p-4 rounded-full mb-6">
         <AlertTriangle size={48} color="#ef4444" />
       </View>
       <Text className="text-2xl font-bold text-foreground mb-3 text-center">
-        ¡Vaya! Algo salió mal
+        {t("root_layout.error_title")}
       </Text>
       <Text className="text-muted-foreground text-center mb-8">
-        Ha ocurrido un error inesperado. Por favor, intenta de nuevo o reinicia la aplicación.
+        {t("root_layout.error_desc")}
       </Text>
       <TouchableOpacity
         className="bg-primary px-8 py-4 rounded-xl shadow-sm"
         onPress={retry}
         accessibilityRole="button"
-        accessibilityLabel="Reintentar cargar la aplicación"
+        accessibilityLabel={t("root_layout.error_retry_accessibility")}
       >
-        <Text className="text-primary-foreground font-bold text-lg">Reintentar</Text>
+        <Text className="text-primary-foreground font-bold text-lg">{t("root_layout.error_retry")}</Text>
       </TouchableOpacity>
     </View>
   );

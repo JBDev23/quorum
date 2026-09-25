@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Tabs, router } from "expo-router";
 import { ShieldCheck, ChevronLeft, Lock } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/lib/auth";
 import { getVoteReceipts, type VoteReceipt } from "@/services/profile";
@@ -9,6 +10,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { ReceiptsSkeleton } from "@/components/skeletons/ReceiptsSkeleton";
 
 export default function VaultScreen() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const colors = useThemeColors();
   const [receipts, setReceipts] = useState<VoteReceipt[]>([]);
@@ -27,7 +29,7 @@ export default function VaultScreen() {
       <Tabs.Screen
         options={{
           headerShown: true,
-          title: "Caja Fuerte",
+          title: t("main.receipts.title"),
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.foreground,
           headerShadowVisible: false,
@@ -51,12 +53,10 @@ export default function VaultScreen() {
             <ShieldCheck size={32} color={colors.primary} strokeWidth={2} />
           </View>
           <Text className="text-foreground text-2xl font-bold text-center mb-4">
-            Registro Inmutable
+            {t("main.receipts.immutable_record")}
           </Text>
           <Text className="text-muted-foreground text-center text-base leading-6">
-            Aquí se guardan las pruebas criptográficas de tu participación. Los
-            votos son anónimos, pero estos recibos garantizan que tu voto entró
-            en la urna.
+            {t("main.receipts.record_desc")}
           </Text>
         </View>
 
@@ -65,21 +65,21 @@ export default function VaultScreen() {
         ) : receipts.length === 0 ? (
           <View className="bg-card border border-border p-8 rounded-3xl items-center mt-4">
             <Lock size={32} color="#525252" className="mb-4" />
-            <Text className="text-foreground font-bold text-lg mb-2">Caja fuerte vacía</Text>
+            <Text className="text-foreground font-bold text-lg mb-2">{t("main.receipts.empty_title")}</Text>
             <Text className="text-muted-foreground text-center">
-              Aún no has participado en ninguna votación oficial.
+              {t("main.receipts.empty_desc")}
             </Text>
           </View>
         ) : (
           <View className="gap-4">
             {receipts.map((receipt) => {
               const dateObj = new Date(receipt.voted_at);
-              const formattedDate = dateObj.toLocaleDateString("es-ES", {
+              const formattedDate = dateObj.toLocaleDateString(i18n.language, {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
               });
-              const formattedTime = dateObj.toLocaleTimeString("es-ES", {
+              const formattedTime = dateObj.toLocaleTimeString(i18n.language, {
                 hour: "2-digit",
                 minute: "2-digit",
               });
@@ -113,7 +113,7 @@ export default function VaultScreen() {
 
                   <View className="bg-primary/5 p-4 rounded-2xl">
                     <Text className="text-muted-foreground text-xs font-medium mb-2">
-                      Hash criptográfico
+                      {t("main.receipts.hash_title")}
                     </Text>
                     {receipt.receipt_hash ? (
                       <Text
@@ -123,8 +123,7 @@ export default function VaultScreen() {
                       </Text>
                     ) : (
                       <Text className="text-muted-foreground text-xs">
-                        No disponible en este dispositivo. Se generó al votar y
-                        solo se conserva localmente.
+                        {t("main.receipts.hash_unavailable")}
                       </Text>
                     )}
                   </View>

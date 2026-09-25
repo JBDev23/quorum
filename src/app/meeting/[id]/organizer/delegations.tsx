@@ -1,4 +1,5 @@
 import { useState, useEffect, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -35,6 +36,7 @@ function DelegationsShell({ children }: { children: ReactNode }) {
 }
 
 export default function OrganizerDelegationsScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { meetingId, status, allowDelegations } = useMeeting();
 
@@ -57,7 +59,7 @@ export default function OrganizerDelegationsScreen() {
         if (!cancelled) {
           alert(
             "Error",
-            toNetworkAwareMessage(err, "No se pudieron cargar las delegaciones.")
+            toNetworkAwareMessage(err, t("meeting.organizer.delegations.error_load"))
           );
         }
       } finally {
@@ -82,11 +84,10 @@ export default function OrganizerDelegationsScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <Text className="text-foreground text-3xl font-extrabold mb-2">
-          Delegaciones
+          {t("meeting.organizer.delegations.title")}
         </Text>
         <Text className="text-muted-foreground text-base mb-8">
-          Como organizador no puedes delegar tu voto. Aquí puedes ver si alguien
-          ha delegado en ti.
+          {t("meeting.organizer.delegations.desc")}
         </Text>
 
         {loading ? (
@@ -97,30 +98,30 @@ export default function OrganizerDelegationsScreen() {
           <>
             <View className="mb-8">
               <Text className="text-foreground font-semibold text-lg mb-4">
-                Mi Voto
+                {t("meeting.organizer.delegations.my_vote")}
               </Text>
               <View className="bg-card border border-border p-6 rounded-3xl items-center">
                 <View className="bg-muted p-4 rounded-full mb-4">
                   <Users size={32} color={colors.mutedForeground} />
                 </View>
                 <Text className="text-foreground text-xl font-bold mb-2">
-                  No disponible
+                  {t("meeting.organizer.delegations.not_available")}
                 </Text>
                 <Text className="text-muted-foreground text-center px-4">
-                  Los organizadores no pueden delegar su voto en esta reunión.
+                  {t("meeting.organizer.delegations.organizer_no_delegate")}
                 </Text>
               </View>
             </View>
 
             <View>
               <Text className="text-foreground font-semibold text-lg mb-4">
-                Han delegado en ti
+                {t("meeting.organizer.delegations.delegated_to_me")}
               </Text>
               <View className="bg-card border border-border p-6 rounded-3xl">
                 {delegatedToMe.length === 0 ? (
                   <View className="justify-center items-center py-10">
                     <Text className="text-muted-foreground text-center">
-                      Nadie ha delegado su voto en ti todavía.
+                      {t("meeting.organizer.delegations.nobody_delegated")}
                     </Text>
                   </View>
                 ) : (

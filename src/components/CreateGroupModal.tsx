@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 import { alert } from "@/components/Alert";
 
 interface CreateGroupModalProps {
@@ -10,11 +11,12 @@ interface CreateGroupModalProps {
 }
 
 export function CreateGroupModal({ visible, onClose, onCreate, isCreating }: CreateGroupModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
 
   const handleCreate = async () => {
     if (name.trim().length < 3) {
-      alert("Aviso", "El nombre debe tener al menos 3 caracteres.");
+      alert(t("common.warning"), t("components.createGroup.error_length"));
       return;
     }
 
@@ -23,7 +25,7 @@ export function CreateGroupModal({ visible, onClose, onCreate, isCreating }: Cre
       setName(""); 
       onClose(); 
     } catch (err) {
-      alert("Error", err instanceof Error ? err.message : "Error desconocido");
+      alert(t("common.error"), err instanceof Error ? err.message : "Error desconocido");
     }
   };
 
@@ -34,14 +36,14 @@ export function CreateGroupModal({ visible, onClose, onCreate, isCreating }: Cre
       <View className="flex-1 bg-overlay/60 justify-center items-center px-4">
         
         <View className="bg-card w-full max-w-sm border border-border rounded-3xl p-6 shadow-2xl">
-          <Text className="text-foreground text-2xl font-bold mb-2">Crear Grupo</Text>
+          <Text className="text-foreground text-2xl font-bold mb-2">{t("components.createGroup.title")}</Text>
           <Text className="text-muted-foreground mb-6">
-            Serás el organizador de este grupo y podrás invitar a otros mediante un código PIN.
+            {t("components.createGroup.desc")}
           </Text>
 
           <TextInput
             className="bg-background border border-border text-foreground text-lg rounded-xl px-4 py-4 mb-6"
-            placeholder="Ej: Junta Vecinal Alcoi"
+            placeholder={t("components.createGroup.placeholder")}
             placeholderTextColor="#525252"
             autoCapitalize="words"
             maxLength={40}
@@ -57,7 +59,7 @@ export function CreateGroupModal({ visible, onClose, onCreate, isCreating }: Cre
               disabled={isCreating}
               className="flex-1 bg-muted py-3 rounded-xl items-center"
             >
-              <Text className="text-foreground font-semibold">Cancelar</Text>
+              <Text className="text-foreground font-semibold">{t("common.cancel")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -70,7 +72,7 @@ export function CreateGroupModal({ visible, onClose, onCreate, isCreating }: Cre
               {isCreating ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="text-primary-foreground font-semibold">Crear</Text>
+                <Text className="text-primary-foreground font-semibold">{t("components.createGroup.create")}</Text>
               )}
             </TouchableOpacity>
           </View>

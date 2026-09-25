@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, ActivityIndicator } from "react-native";
 import { Redirect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,6 +30,7 @@ function AccreditationShell({ children }: { children: ReactNode }) {
 }
 
 export default function MemberAccreditationScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { meetingId, status, allowDelegations } = useMeeting();
   const { user } = useAuth();
@@ -106,7 +108,7 @@ export default function MemberAccreditationScreen() {
     return (
       <AccreditationShell>
         <View className="flex-1 justify-center items-center p-6">
-          <Text className="text-muted-foreground">Inicia sesión para ver tu QR.</Text>
+          <Text className="text-muted-foreground">{t("meeting.member.accreditation.login_qr")}</Text>
         </View>
       </AccreditationShell>
     );
@@ -120,18 +122,16 @@ export default function MemberAccreditationScreen() {
           <View className="bg-card border border-success/80/30 rounded-3xl p-8 items-center w-full max-w-sm">
             <CheckCircle2 size={72} color="#22c55e" className="mb-4" />
             <Text className="text-foreground text-2xl font-bold mb-2 text-center">
-              ¡Acreditado!
+              {t("meeting.member.accreditation.accredited")}
             </Text>
             <Text className="text-muted-foreground text-center text-base mb-8">
-              Tu asistencia está registrada. Aún no hay urnas: la reunión sigue en
-              fase de acreditación.
+              {t("meeting.member.accreditation.accredited_desc")}
             </Text>
 
             <View className="w-full bg-background border border-border rounded-2xl p-4 flex-row items-start gap-3">
               <Clock size={22} color="#a3a3a3" />
               <Text className="text-muted-foreground flex-1 text-sm leading-5">
-                Cuando el organizador inicie la asamblea, pasarás automáticamente a
-                la pestaña Urnas.
+                {t("meeting.member.accreditation.wait_urns")}
               </Text>
             </View>
           </View>
@@ -143,9 +143,9 @@ export default function MemberAccreditationScreen() {
   return (
     <AccreditationShell>
       <View className="flex-1 justify-center items-center p-6">
-        <Text className="text-foreground text-2xl font-bold mb-2">Tu Acreditación</Text>
+        <Text className="text-foreground text-2xl font-bold mb-2">{t("meeting.member.accreditation.your_accreditation")}</Text>
         <Text className="text-muted-foreground text-center mb-8">
-          Muestra este código en la entrada para que el organizador te registre.
+          {t("meeting.member.accreditation.show_code")}
         </Text>
 
         <View className="p-4 bg-card rounded-3xl">
@@ -153,7 +153,7 @@ export default function MemberAccreditationScreen() {
         </View>
 
         <Text className="text-muted-foreground mt-8 text-xs font-mono">
-          Meeting: {meetingId.slice(0, 8)}… · User: {user?.id?.slice(0, 8)}…
+          {t("voting.hardcoded.meeting")} {meetingId.slice(0, 8)} {t("voting.hardcoded.user")} {user?.id?.slice(0, 8)}…
         </Text>
       </View>
     </AccreditationShell>

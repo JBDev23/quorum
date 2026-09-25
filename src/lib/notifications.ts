@@ -55,18 +55,39 @@ export async function registerForPushNotificationsAsync(
     return null;
   }
 
-  try {
-    const token = (
-      await Notifications.getExpoPushTokenAsync({ projectId })
-    ).data;
+  let token: string | null = null;
+  let retries = 3;
 
-    const platform = Platform.OS === "ios" ? "ios" : "android";
-    await upsertPushToken(userId, token, platform);
-    return token;
-  } catch (error) {
-    console.warn("Failed to register push token:", error);
-    return null;
+  for (let i = 0; i < retries; i++) {
+    try {
+      token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+      break; // Success, exit the retry loop
+    } catch (error: any) {
+      if (
+        i < retries - 1 &&
+        error?.message?.includes("SERVICE_NOT_AVAILABLE")
+      ) {
+        // Wait before retrying (exponential backoff)
+        await new Promise((resolve) => setTimeout(resolve, 2000 * (i + 1)));
+        continue;
+      }
+      console.warn("Failed to register push token after retries:", error);
+      return null;
+    }
   }
+
+  if (token) {
+    try {
+      const platform = Platform.OS === "ios" ? "ios" : "android";
+      await upsertPushToken(userId, token, platform);
+      return token;
+    } catch (dbError) {
+      console.warn("Failed to save push token to database:", dbError);
+      return null;
+    }
+  }
+
+  return null;
 }
 
 export async function unregisterPushTokenAsync(

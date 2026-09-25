@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { CameraView, Camera } from "expo-camera";
 import { Redirect, router } from "expo-router";
@@ -20,6 +21,7 @@ import { ScanResultModal, type ScanOutcomeData } from "@/components/ScanResultMo
 import { useThemeColors } from "@/theme/useThemeColors";
 
 export default function OrganizerScannerScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { meetingId, groupId, status, allowDelegations } = useMeeting();
   const tabs = organizerTabsForStatus(status, allowDelegations);
@@ -68,18 +70,18 @@ export default function OrganizerScannerScreen() {
       try {
         payload = JSON.parse(data);
       } catch {
-        throw new Error("Código no válido o corrupto");
+        throw new Error(t("meeting.organizer.scanner.invalid_qr"));
       }
 
       if (!payload.meeting_id || !payload.user_id) {
-        throw new Error("Formato QR no válido");
+        throw new Error(t("meeting.organizer.scanner.invalid_format"));
       }
 
       if (payload.meeting_id !== meetingId) {
         setScanOutcome({
           type: "error",
-          title: "Reunión incorrecta",
-          message: "Este código QR pertenece a otra asamblea.",
+          title: t("meeting.organizer.scanner.wrong_meeting"),
+          message: t("meeting.organizer.scanner.wrong_meeting_desc"),
         });
         return;
       }
@@ -93,7 +95,7 @@ export default function OrganizerScannerScreen() {
 
       const fullName = [userData?.first_name, userData?.last_name]
         .filter(Boolean)
-        .join(" ") || "Usuario Desconocido";
+        .join(" ") || t("meeting.organizer.scanner.unknown_user");
 
       const userInfo = {
         fullName,
@@ -107,16 +109,16 @@ export default function OrganizerScannerScreen() {
       if (result === "existing") {
         setScanOutcome({
           type: "existing",
-          title: "Ya acreditado",
-          message: "Este usuario ya había registrado su asistencia previamente.",
+          title: t("meeting.organizer.scanner.already_accredited"),
+          message: t("meeting.organizer.scanner.already_accredited_desc"),
           user: userInfo
         });
       } else {
         loadStats(); // Recargar stats si es nuevo
         setScanOutcome({
           type: "success",
-          title: "Acreditado con éxito",
-          message: "Asistencia registrada correctamente.",
+          title: t("meeting.organizer.scanner.accredited_success"),
+          message: t("meeting.organizer.scanner.accredited_success_desc"),
           user: userInfo
         });
       }
@@ -128,10 +130,10 @@ export default function OrganizerScannerScreen() {
         return;
       }
 
-      const message = error instanceof Error ? error.message : "Código no válido o corrupto";
+      const message = error instanceof Error ? error.message : t("meeting.organizer.scanner.invalid_qr");
       setScanOutcome({
         type: "error",
-        title: "Error de lectura",
+        title: t("meeting.organizer.scanner.read_error"),
         message,
       });
     }
@@ -143,7 +145,7 @@ export default function OrganizerScannerScreen() {
   if (hasPermission === false) {
     return (
       <View className="flex-1 bg-background justify-center items-center">
-        <Text className="text-foreground text-lg">No hay acceso a la cámara</Text>
+        <Text className="text-foreground text-lg">{t("meeting.organizer.scanner.no_camera_access")}</Text>
       </View>
     );
   }
@@ -166,7 +168,7 @@ export default function OrganizerScannerScreen() {
         <View className="bg-[#1A1A24] rounded-2xl p-4 flex-row items-center justify-between border border-white/5">
           <View>
             <Text className="text-muted-foreground text-xs font-bold tracking-widest uppercase mb-1">
-              Acreditados
+              {t("meeting.organizer.scanner.accredited_count")}
             </Text>
             <View className="flex-row items-baseline gap-1">
               <Text className="text-primary-foreground text-3xl font-extrabold">{stats.accredited}</Text>
@@ -186,7 +188,7 @@ export default function OrganizerScannerScreen() {
       <View className="absolute bottom-10 left-0 right-0 items-center">
         <View className="bg-card/80 px-6 py-3 rounded-full">
           <Text className="text-foreground font-semibold">
-            {scanned ? "Procesando código..." : "Apunta al QR del participante"}
+            {scanned ? t("meeting.organizer.scanner.processing") : t("meeting.organizer.scanner.point_qr")}
           </Text>
         </View>
       </View>

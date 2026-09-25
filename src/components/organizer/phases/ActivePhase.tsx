@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { Square, ListTodo, QrCode, Vote } from "lucide-react-native";
 
@@ -23,6 +24,7 @@ export function ActivePhase({
   groupId,
   onStatusUpdated,
 }: ActivePhaseProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { user } = useAuth();
   const { isUpdating, confirmAndApply } = useMeetingStatusChange(
@@ -51,10 +53,9 @@ export function ActivePhase({
 
   const handleCloseMeeting = () => {
     confirmAndApply("closed", {
-      title: "Finalizar reunión",
-      message:
-        "Se cerrarán las votaciones y nadie podrá acreditarse más. Esta acción no se puede deshacer fácilmente. ¿Continuar?",
-      confirmLabel: "Sí, finalizar",
+      title: t("meeting.organizer.phases.active.close_title"),
+      message: t("meeting.organizer.phases.active.close_msg"),
+      confirmLabel: t("meeting.organizer.phases.active.close_confirm"),
     });
   };
 
@@ -62,8 +63,7 @@ export function ActivePhase({
     <View>
       <View className="gap-4 mb-8">
         <Text className="text-muted-foreground mb-2">
-          La reunión está en curso. Gestiona las encuestas, emite tu voto y, si
-          hace falta, sigue acreditando llegadas tardías.
+          {t("meeting.organizer.dashboard.desc_active")}
         </Text>
 
         <AttendanceStat
@@ -73,8 +73,8 @@ export function ActivePhase({
         />
 
         <PanelActionRow
-          title="Urnas"
-          subtitle="Emitir tu voto como acreditado"
+          title={t("meeting.organizer.tabs.urns")}
+          subtitle={t("meeting.organizer.dashboard.desc_active")}
           icon={<Vote size={24} color={colors.secondary} />}
           onPress={() =>
             router.push(`/meeting/${meetingId}/organizer/votes`)
@@ -82,17 +82,17 @@ export function ActivePhase({
         />
 
         <PanelActionRow
-          title="Preguntas y Encuestas"
-          subtitle="Gestiona las votaciones activas"
+          title={t("meeting.organizer.phases.active.polls_title")}
+          subtitle={t("meeting.organizer.phases.active.polls_subtitle")}
           icon={<ListTodo size={24} color={colors.secondary} />}
           onPress={() =>
-            router.push(`/meeting/${meetingId}/organizer/surveys`)
+            router.push(`/meeting/${meetingId}/organizer/polls`)
           }
         />
 
         <PanelActionRow
-          title="Escáner QR"
-          subtitle="Acreditaciones tardías"
+          title={t("meeting.organizer.tabs.scanner")}
+          subtitle={t("meeting.organizer.phases.accreditation.scanner_subtitle")}
           icon={<QrCode size={24} color={colors.secondary} />}
           onPress={() =>
             router.push(`/meeting/${meetingId}/organizer/scanner`)
@@ -101,12 +101,12 @@ export function ActivePhase({
       </View>
 
       <PhasePrimaryButton
-        label="Finalizar reunión"
+        label={t("meeting.organizer.phases.active.close_btn")}
         onPress={handleCloseMeeting}
         loading={isUpdating}
         tone="danger"
         icon={<Square color="white" size={18} fill="white" />}
-        hint="Al finalizar, la reunión pasa a cerrada y se registra la hora de fin."
+        hint={t("meeting.organizer.phases.active.close_hint")}
       />
     </View>
   );

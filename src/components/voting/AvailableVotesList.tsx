@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { User, Users, CheckCircle2, ChevronRight } from "lucide-react-native";
 import type { AvailableVote } from "@/services/votes";
 import { useAuth } from "@/lib/auth";
@@ -10,6 +11,7 @@ interface AvailableVotesListProps {
 }
 
 export function AvailableVotesList({ votes, onSelect }: AvailableVotesListProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   
   const allVoted = votes.every((v) => v.hasVoted);
@@ -23,17 +25,17 @@ export function AvailableVotesList({ votes, onSelect }: AvailableVotesListProps)
               <View className="bg-secondary/10 px-2 py-1 rounded-full border border-secondary/30 flex-row items-center gap-1.5">
                 <View className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
                 <Text className="text-secondary font-bold text-[9px] tracking-widest uppercase">
-                  Votación Abierta
+                  {t("voting.available_votes.open")}
                 </Text>
               </View>
             </View>
             <Text className="text-foreground text-3xl font-extrabold leading-tight mb-2">
-              Votos Disponibles
+              {t("voting.available_votes.title")}
             </Text>
             <Text className="text-muted-foreground text-base mb-6">
               {allVoted
-                ? "Has emitido todos los votos disponibles para esta reunión."
-                : "Tienes delegaciones activas. Selecciona un voto para emitirlo."}
+                ? t("voting.available_votes.all_voted")
+                : t("voting.available_votes.has_delegations")}
             </Text>
 
             <View className="gap-4">
@@ -80,7 +82,7 @@ export function AvailableVotesList({ votes, onSelect }: AvailableVotesListProps)
                             : "text-primary/80 font-medium"
                         }`}
                       >
-                        {vote.hasVoted ? "Voto emitido" : "Pendiente de emitir"}
+                        {vote.hasVoted ? t("voting.available_votes.vote_casted") : t("voting.available_votes.vote_pending")}
                       </Text>
                     </View>
                     <View>

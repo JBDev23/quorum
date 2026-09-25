@@ -55,7 +55,7 @@ export function organizerTabsForStatus(
   return {
     panel: true as const,
     scanner: status === "accreditation" || status === "active",
-    surveys: status !== "closed",
+    polls: status !== "closed",
     votes: status === "active",
     results: status === "closed",
     delegations: allowDelegations && status !== "closed",

@@ -13,7 +13,8 @@ import {
 import { X, Plus, Trash2 } from "lucide-react-native";
 
 import { alert } from "@/components/Alert";
-import { type PollType, POLL_TYPE_LABELS } from "@/services/polls";
+import { type PollType } from "@/services/polls";
+import { useTranslation } from "react-i18next";
 
 interface CreatePollModalProps {
   visible: boolean;
@@ -26,14 +27,16 @@ interface CreatePollModalProps {
   isCreating: boolean;
 }
 
-const TYPE_OPTIONS: { value: PollType; description: string }[] = [
+const TYPE_OPTIONS: { value: PollType; titleKey: string; descKey: string }[] = [
   {
     value: "yes_no",
-    description: "Aprobación clásica con Sí y No",
+    titleKey: "components.createPoll.type_yes_no",
+    descKey: "components.createPoll.yes_no_desc",
   },
   {
     value: "multiple_choice",
-    description: "Elige entre varias opciones personalizadas",
+    titleKey: "components.createPoll.type_multiple",
+    descKey: "components.createPoll.multiple_desc",
   },
 ];
 
@@ -43,6 +46,7 @@ export function CreatePollModal({
   onCreate,
   isCreating,
 }: CreatePollModalProps) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [type, setType] = useState<PollType>("yes_no");
   const [options, setOptions] = useState(["", ""]);
@@ -76,11 +80,11 @@ export function CreatePollModal({
 
   const handleCreate = async () => {
     if (title.trim().length < 5) {
-      alert("Aviso", "El título debe tener al menos 5 caracteres.");
+      alert(t("common.warning"), t("components.createPoll.error_title"));
       return;
     }
     if (type === "multiple_choice" && filledOptions.length < 2) {
-      alert("Aviso", "Añade al menos 2 opciones.");
+      alert(t("common.warning"), t("components.createPoll.error_options"));
       return;
     }
 
@@ -92,8 +96,8 @@ export function CreatePollModal({
       });
     } catch (err) {
       alert(
-        "Error",
-        err instanceof Error ? err.message : "No se pudo guardar la pregunta."
+        t("common.error"),
+        err instanceof Error ? err.message : t("components.createPoll.error_save")
       );
     }
   };
@@ -117,7 +121,7 @@ export function CreatePollModal({
             >
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-foreground text-xl font-bold">
-                  Nueva Votación
+                  {t("components.createPoll.title")}
                 </Text>
                 <TouchableOpacity
                   onPress={onClose}
@@ -129,11 +133,11 @@ export function CreatePollModal({
               </View>
 
               <Text className="text-muted-foreground font-medium mb-2 ml-1">
-                Pregunta
+                {t("components.createPoll.question")}
               </Text>
               <TextInput
                 className="bg-background border border-border text-foreground text-lg rounded-xl px-4 py-4 mb-5"
-                placeholder="Ej: ¿Aprobamos las cuentas?"
+                placeholder={t("components.createPoll.placeholder")}
                 placeholderTextColor="#525252"
                 multiline
                 numberOfLines={3}
@@ -144,7 +148,7 @@ export function CreatePollModal({
               />
 
               <Text className="text-muted-foreground font-medium mb-2 ml-1">
-                Tipo de votación
+                {t("components.createPoll.poll_type")}
               </Text>
               <View className="gap-2 mb-5">
                 {TYPE_OPTIONS.map((option) => {
@@ -165,10 +169,10 @@ export function CreatePollModal({
                           selected ? "text-secondary-foreground" : "text-foreground"
                         }`}
                       >
-                        {POLL_TYPE_LABELS[option.value]}
+                        {t(option.titleKey as any)}
                       </Text>
                       <Text className="text-muted-foreground text-sm">
-                        {option.description}
+                        {t(option.descKey as any)}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -177,20 +181,19 @@ export function CreatePollModal({
 
               {type === "yes_no" ? (
                 <Text className="text-muted-foreground text-xs mb-6 px-1">
-                  Se añadirán automáticamente las opciones «Sí» y «No». El voto
-                  en blanco se controla en la configuración de la reunión.
+                  {t("components.createPoll.yes_no_info")}
                 </Text>
               ) : (
                 <View className="mb-6">
                   <Text className="text-muted-foreground font-medium mb-2 ml-1">
-                    Opciones
+                    {t("components.createPoll.options")}
                   </Text>
                   <View className="gap-2">
                     {options.map((option, index) => (
                       <View key={index} className="flex-row items-center gap-2">
                         <TextInput
                           className="flex-1 bg-background border border-border text-foreground rounded-xl px-4 py-3"
-                          placeholder={`Opción ${index + 1}`}
+                          placeholder={t("components.createPoll.option_placeholder", { index: index + 1 })}
                           placeholderTextColor="#525252"
                           value={option}
                           onChangeText={(value) => updateOption(index, value)}
@@ -218,7 +221,7 @@ export function CreatePollModal({
                     >
                       <Plus size={16} color="#a3a3a3" />
                       <Text className="text-muted-foreground font-medium">
-                        Añadir opción
+                        {t("components.createPoll.add_option")}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -236,7 +239,7 @@ export function CreatePollModal({
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text className="text-primary-foreground font-bold text-lg">
-                    Guardar Votación
+                    {t("components.createPoll.save")}
                   </Text>
                 )}
               </TouchableOpacity>

@@ -24,7 +24,10 @@ import {
   FileText,
   Trash2,
   ChevronRight,
+  Globe,
 } from "lucide-react-native";
+
+import { useTranslation } from "react-i18next";
 
 import { TermsModal } from "@/components/TermsModal";
 import { PrivacyModal } from "@/components/PrivacyModal";
@@ -156,6 +159,7 @@ function themeSelectedStyle(card: string, border: string) {
 }
 
 export default function SettingsScreen() {
+  const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
   const {
     hapticEnabled,
@@ -190,7 +194,7 @@ export default function SettingsScreen() {
       .catch((err) => {
         console.error(err);
         if (!cancelled) {
-          alert("Error", "No se pudieron cargar las preferencias de notificación.");
+          alert(t("settings.alert_error"), t("settings.alert_notify_error"));
         }
       })
       .finally(() => {
@@ -213,10 +217,10 @@ export default function SettingsScreen() {
       } catch (err) {
         setNotifyPrefs(previous);
         alert(
-          "Error",
+          t("settings.alert_error"),
           err instanceof Error
             ? err.message
-            : "No se pudieron guardar las preferencias."
+            : t("settings.alert_notify_save_error")
         );
       } finally {
         setNotifySaving(false);
@@ -232,7 +236,7 @@ export default function SettingsScreen() {
     }
     const check = await canUseBiometrics();
     if (!check.ok) {
-      alert("Biometría no disponible", check.reason ?? "No se puede activar.");
+      alert(t("settings.alert_bio_unavail_title"), check.reason ?? t("settings.alert_bio_unavail_msg"));
       return;
     }
     await setBioAuthEnabled(true);
@@ -245,11 +249,11 @@ export default function SettingsScreen() {
       await exportVoteReceiptsCsv(user.id);
     } catch (err) {
       if (err instanceof Error && err.message === "EMPTY") {
-        alert("Caja fuerte vacía", "No hay recibos para exportar.");
+        alert(t("settings.alert_export_empty_title"), t("settings.alert_export_empty_msg"));
       } else {
         alert(
-          "Error",
-          err instanceof Error ? err.message : "No se pudo exportar el CSV."
+          t("settings.alert_error"),
+          err instanceof Error ? err.message : t("settings.alert_export_error")
         );
       }
     } finally {
@@ -270,8 +274,8 @@ export default function SettingsScreen() {
       }
     } catch (err) {
       alert(
-        "Error",
-        err instanceof Error ? err.message : "No se pudo eliminar la cuenta."
+        t("settings.alert_error"),
+        err instanceof Error ? err.message : t("settings.alert_delete_error")
       );
       setDeleting(false);
     }
@@ -279,12 +283,12 @@ export default function SettingsScreen() {
 
   const handleDeleteAccount = () => {
     alert(
-      "Eliminar Cuenta",
-      "Esta acción es irreversible y borrará todos tus datos, excepto los recibos de votación que ya forman parte del escrutinio anónimo.\n\n¿Estás completamente seguro?",
+      t("settings.alert_delete_title"),
+      t("settings.alert_delete_msg"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("settings.alert_delete_cancel"), style: "cancel" },
         {
-          text: "Sí, eliminar",
+          text: t("settings.alert_delete_confirm"),
           style: "destructive",
           onPress: () => void performDelete(),
         },
@@ -300,29 +304,75 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }} className="bg-background" stickyHeaderIndices={[0]}>
         <View className="w-full px-6 pt-6 pb-4 bg-background z-10">
           <Text className="text-3xl font-extrabold text-foreground">
-            Ajustes
+            {t("settings.title")}
           </Text>
         </View>
 
         <View className="pt-4 pb-2 px-6">
           <Text className="text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
-            PREFERENCIAS
+            {t("settings.section_preferences")}
           </Text>
         </View>
         <View className="px-6">
           <SettingSwitchRow
             icon={Vibrate}
-            title="Feedback Háptico"
-            description="Vibración al votar o escanear códigos"
+            title={t("settings.haptic_title")}
+            description={t("settings.haptic_desc")}
             value={hapticEnabled}
             onValueChange={(v) => void setHapticEnabled(v)}
           />
+          <View className="py-4 border-b border-border/30">
+            <View className="flex-row items-center mb-3">
+              <View className="mr-4">
+                <Globe size={22} color={colors.mutedForeground} />
+              </View>
+              <Text className="text-foreground font-semibold text-base">{t("settings.language")}</Text>
+            </View>
+            <View className="flex-row bg-muted p-1.5 rounded-[16px] border border-border">
+              <TouchableOpacity
+                onPress={() => void i18n.changeLanguage("es")}
+                activeOpacity={0.7}
+                className="flex-1 flex-row items-center justify-center py-2.5 rounded-[12px] gap-2"
+                style={
+                  i18n.language === "es"
+                    ? themeSelectedStyle(colors.card, colors.border)
+                    : undefined
+                }
+              >
+                <Text
+                  className={`font-bold text-[13px] ${
+                    i18n.language === "es" ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {t("settings.lang_es")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => void i18n.changeLanguage("en")}
+                activeOpacity={0.7}
+                className="flex-1 flex-row items-center justify-center py-2.5 rounded-[12px] gap-2"
+                style={
+                  i18n.language === "en"
+                    ? themeSelectedStyle(colors.card, colors.border)
+                    : undefined
+                }
+              >
+                <Text
+                  className={`font-bold text-[13px] ${
+                    i18n.language === "en" ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {t("settings.lang_en")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           <View className="py-4">
             <View className="flex-row items-center mb-3">
               <View className="mr-4">
                 <Moon size={22} color={colors.mutedForeground} />
               </View>
-              <Text className="text-foreground font-semibold text-base">Apariencia</Text>
+              <Text className="text-foreground font-semibold text-base">{t("settings.appearance")}</Text>
             </View>
             <View className="flex-row bg-muted p-1.5 rounded-[16px] border border-border">
               <TouchableOpacity
@@ -344,7 +394,7 @@ export default function SettingsScreen() {
                     theme === "dark" ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  Oscuro
+                  {t("settings.theme_dark")}
                 </Text>
               </TouchableOpacity>
 
@@ -367,7 +417,7 @@ export default function SettingsScreen() {
                     theme === "light" ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  Claro
+                  {t("settings.theme_light")}
                 </Text>
               </TouchableOpacity>
 
@@ -390,7 +440,7 @@ export default function SettingsScreen() {
                     theme === "system" ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  Sistema
+                  {t("settings.theme_system")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -399,12 +449,12 @@ export default function SettingsScreen() {
 
         <View className="pt-6 pb-2 px-6 border-t border-border/30 mt-2">
           <Text className="text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
-            NOTIFICACIONES
+            {t("settings.section_notifications")}
           </Text>
         </View>
         <View className="px-6 mb-2">
           <Text className="text-muted-foreground text-[13px]">
-            Recibirás alertas según tus preferencias cuando haya asambleas, acreditaciones o votaciones.
+            {t("settings.notify_desc")}
           </Text>
         </View>
         <View className="px-6">
@@ -414,22 +464,22 @@ export default function SettingsScreen() {
             <>
               <SettingSwitchRow
                 icon={Bell}
-                title="Nuevas Asambleas"
+                title={t("settings.notify_meetings")}
                 value={notifyPrefs.notify_new_meetings}
                 onValueChange={(v) => void updateNotify("notify_new_meetings", v)}
                 disabled={notifyDisabled}
               />
               <SettingSwitchRow
                 icon={Bell}
-                title="Apertura de Acreditaciones"
+                title={t("settings.notify_doors")}
                 value={notifyPrefs.notify_doors_open}
                 onValueChange={(v) => void updateNotify("notify_doors_open", v)}
                 disabled={notifyDisabled}
               />
               <SettingSwitchRow
                 icon={Bell}
-                title="Nuevas Votaciones"
-                description="Avisar en tiempo real al abrir urnas"
+                title={t("settings.notify_polls_title")}
+                description={t("settings.notify_polls_desc")}
                 value={notifyPrefs.notify_polls}
                 onValueChange={(v) => void updateNotify("notify_polls", v)}
                 disabled={notifyDisabled}
@@ -441,24 +491,24 @@ export default function SettingsScreen() {
 
         <View className="pt-6 pb-2 px-6 border-t border-border/30 mt-2">
           <Text className="text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
-            PRIVACIDAD Y SEGURIDAD
+            {t("settings.section_privacy")}
           </Text>
         </View>
         <View className="px-6">
           <SettingSwitchRow
             icon={Fingerprint}
-            title="Protección Biométrica"
-            description="Requerir huella o FaceID para emitir un voto"
+            title={t("settings.bio_title")}
+            description={t("settings.bio_desc")}
             value={bioAuthEnabled}
             onValueChange={(v) => void handleBioToggle(v)}
           />
           <SettingActionRow
             icon={Download}
-            title="Exportar Caja Fuerte"
+            title={t("settings.export_title")}
             description={
               exporting
-                ? "Generando CSV…"
-                : "Descargar recibos de votación (CSV)"
+                ? t("settings.export_desc_loading")
+                : t("settings.export_desc_idle")
             }
             onPress={() => void handleExport()}
             disabled={exporting}
@@ -468,27 +518,27 @@ export default function SettingsScreen() {
 
         <View className="pt-6 pb-2 px-6 border-t border-border/30 mt-2">
           <Text className="text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
-            ACERCA DE
+            {t("settings.section_about")}
           </Text>
         </View>
         <View className="px-6">
           <SettingActionRow
             icon={LifeBuoy}
-            title="Soporte y Ayuda"
+            title={t("settings.support")}
             onPress={() =>
               Linking.openURL(
-                `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Ayuda con quorum")}`
+                `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(t("settings.support_subject"))}`
               )
             }
           />
           <SettingActionRow
             icon={FileText}
-            title="Términos y Condiciones"
+            title={t("settings.terms")}
             onPress={() => setShowTerms(true)}
           />
           <SettingActionRow
             icon={FileText}
-            title="Política de Privacidad"
+            title={t("settings.privacy")}
             onPress={() => setShowPrivacy(true)}
             hideBorder
           />
@@ -497,8 +547,8 @@ export default function SettingsScreen() {
         <View className="px-6 mt-8">
           <SettingActionRow
             icon={Trash2}
-            title={deleting ? "Eliminando…" : "Eliminar cuenta"}
-            description="Borrar datos personales permanentemente"
+            title={deleting ? t("settings.delete_title_loading") : t("settings.delete_title_idle")}
+            description={t("settings.delete_desc")}
             isDanger
             onPress={handleDeleteAccount}
             disabled={deleting}

@@ -1,9 +1,11 @@
 import { Tabs } from "expo-router";
 import { Home, Users, User, Settings } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { useThemeColors } from "@/theme/useThemeColors";
 
 export default function MainLayout() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
 
   return (
@@ -21,32 +23,32 @@ export default function MainLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Inicio",
-          tabBarLabel: "Inicio",
+          title: t("main.layout.tab_home"),
+          tabBarLabel: t("main.layout.tab_home"),
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="groups"
         options={{
-          title: "Grupos",
-          tabBarLabel: "Grupos",
+          title: t("main.layout.tab_groups"),
+          tabBarLabel: t("main.layout.tab_groups"),
           tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Perfil",
-          tabBarLabel: "Perfil",
+          title: t("main.layout.tab_profile"),
+          tabBarLabel: t("main.layout.tab_profile"),
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Ajustes",
-          tabBarLabel: "Ajustes",
+          title: t("main.layout.tab_settings"),
+          tabBarLabel: t("main.layout.tab_settings"),
           tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
         }}
       />

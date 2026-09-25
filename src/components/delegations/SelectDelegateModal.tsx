@@ -14,6 +14,7 @@ import { X, Search, User } from "lucide-react-native";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { fetchGroupMembersForDelegation, type DelegateCandidate } from "@/services/groups";
 import { alert } from "@/components/Alert";
+import { useTranslation } from "react-i18next";
 
 interface SelectDelegateModalProps {
   visible: boolean;
@@ -31,6 +32,7 @@ export function SelectDelegateModal({
   onSelect
 }: SelectDelegateModalProps) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [members, setMembers] = useState<DelegateCandidate[]>([]);
@@ -50,7 +52,7 @@ export function SelectDelegateModal({
           setMembers(data);
         }
       } catch (err) {
-        if (mounted) setError("No se pudieron cargar los miembros.");
+        if (mounted) setError(t("components.delegations.error_load"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -68,12 +70,12 @@ export function SelectDelegateModal({
   const handlePressMember = (member: DelegateCandidate) => {
     if (submitting) return;
     alert(
-      "Confirmar Delegación",
-      `¿Estás seguro que deseas delegar tu voto en ${member.first_name} ${member.last_name}?`,
+      t("components.delegations.confirm_title"),
+      t("components.delegations.confirm_msg", { name: `${member.first_name} ${member.last_name}` }),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Sí, delegar",
+          text: t("components.delegations.confirm_btn"),
           onPress: () => {
             void (async () => {
               setSubmitting(true);
@@ -99,7 +101,7 @@ export function SelectDelegateModal({
           
           <View className="px-6 flex-row items-center justify-between mb-6">
             <Text className="text-foreground text-2xl font-extrabold">
-              Seleccionar Delegado
+              {t("components.delegations.select_delegate")}
             </Text>
             <TouchableOpacity
               onPress={onClose}
@@ -114,7 +116,7 @@ export function SelectDelegateModal({
               <Search color={colors.mutedForeground} size={20} className="mr-2" />
               <TextInput 
                 className="flex-1 text-foreground text-base"
-                placeholder="Buscar por nombre..."
+                placeholder={t("components.delegations.search_placeholder")}
                 placeholderTextColor={colors.mutedForeground}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -133,7 +135,7 @@ export function SelectDelegateModal({
           ) : filteredMembers.length === 0 ? (
             <View className="flex-1 justify-center items-center px-6">
               <Text className="text-muted-foreground text-center">
-                {searchQuery ? "No se encontraron miembros." : "No hay otros miembros en este grupo."}
+                {searchQuery ? t("components.delegations.no_members_found") : t("components.delegations.no_other_members")}
               </Text>
             </View>
           ) : (

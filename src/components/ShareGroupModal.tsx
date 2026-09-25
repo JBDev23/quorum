@@ -2,6 +2,7 @@ import { Modal, View, Text, TouchableOpacity } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { X } from "lucide-react-native";
 import type { GroupListItem } from "@/services/groups";
+import { useTranslation } from "react-i18next";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 interface ShareGroupModalProps {
@@ -11,6 +12,7 @@ interface ShareGroupModalProps {
 }
 
 export function ShareGroupModal({ visible, onClose, group }: ShareGroupModalProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   if (!group) return null;
 
@@ -27,6 +29,8 @@ export function ShareGroupModal({ visible, onClose, group }: ShareGroupModalProp
           <TouchableOpacity
             onPress={onClose}
             className="absolute top-5 right-5 w-8 h-8 bg-muted rounded-full items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel={t("common.close")}
           >
             <X color={colors.mutedForeground} size={18} />
           </TouchableOpacity>
@@ -35,7 +39,7 @@ export function ShareGroupModal({ visible, onClose, group }: ShareGroupModalProp
             {group.name}
           </Text>
           <Text className="text-muted-foreground mb-8 text-center text-[15px]">
-            Escanea este QR para unirte al instante
+            {t("components.shareGroup.scan_desc")}
           </Text>
 
           <View className="p-5 bg-card rounded-[24px] mb-8 shadow-sm border border-border">
@@ -44,7 +48,7 @@ export function ShareGroupModal({ visible, onClose, group }: ShareGroupModalProp
 
           <View className="bg-primary/10 w-full px-6 py-4 rounded-[24px] border border-primary/20">
             <Text className="text-primary text-[11px] uppercase tracking-widest mb-1.5 text-center font-bold">
-              O usa este PIN
+              {t("components.shareGroup.or_use_pin")}
             </Text>
             <Text className="text-foreground text-3xl font-mono tracking-widest text-center font-extrabold">
               {group.invitePin}

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import i18n from "@/lib/i18n";
 
 export type GroupRole = "organizer" | "participant";
 
@@ -55,19 +56,19 @@ type GroupMutationRpcResult = {
 
 function mapGroupMutationError(message: string, fallback: string): Error {
   if (message.includes("INVALID_PIN")) {
-    return new Error("PIN inválido o el grupo no existe.");
+    return new Error(i18n.t("services.groups.invalid_pin"));
   }
   if (message.includes("ALREADY_MEMBER")) {
-    return new Error("Ya eres miembro de este grupo.");
+    return new Error(i18n.t("services.groups.already_member"));
   }
   if (message.includes("NOT_AUTHENTICATED")) {
-    return new Error("Debes iniciar sesión.");
+    return new Error(i18n.t("services.groups.auth_required"));
   }
   if (message.includes("INVALID_NAME")) {
-    return new Error("El nombre del grupo debe tener al menos 3 caracteres.");
+    return new Error(i18n.t("services.groups.invalid_name"));
   }
   if (message.includes("PIN_GENERATION_FAILED")) {
-    return new Error("No se pudo generar un PIN. Inténtalo de nuevo.");
+    return new Error(i18n.t("services.groups.pin_generation_error"));
   }
   return new Error(fallback);
 }
@@ -78,12 +79,12 @@ export async function joinGroupByPin(pin: string): Promise<GroupListItem> {
   });
 
   if (error) {
-    throw mapGroupMutationError(error.message, "No se pudo unir al grupo. Inténtalo de nuevo.");
+    throw mapGroupMutationError(error.message, i18n.t("services.groups.join_error"));
   }
 
   const group = data as GroupMutationRpcResult | null;
   if (!group?.id) {
-    throw new Error("No se pudo unir al grupo. Inténtalo de nuevo.");
+    throw new Error(i18n.t("services.groups.join_error"));
   }
 
   return {
@@ -102,7 +103,7 @@ export async function leaveOrDeleteGroup(userId: string, groupId: string, isOrga
       .match({ id: groupId, creator_id: userId });
 
     if (error) {
-      throw new Error("No se pudo eliminar el grupo.");
+      throw new Error(i18n.t("services.groups.delete_error"));
     }
   } else {
     const { error } = await supabase
@@ -111,7 +112,7 @@ export async function leaveOrDeleteGroup(userId: string, groupId: string, isOrga
       .match({ user_id: userId, group_id: groupId });
 
     if (error) {
-      throw new Error("No se pudo salir del grupo. Inténtalo de nuevo.");
+      throw new Error(i18n.t("services.groups.leave_error"));
     }
   }
 }
@@ -122,12 +123,12 @@ export async function createGroup(name: string): Promise<GroupListItem> {
   });
 
   if (error) {
-    throw mapGroupMutationError(error.message, "No se pudo crear el grupo.");
+    throw mapGroupMutationError(error.message, i18n.t("services.groups.create_error"));
   }
 
   const group = data as GroupMutationRpcResult | null;
   if (!group?.id) {
-    throw new Error("No se pudo crear el grupo.");
+    throw new Error(i18n.t("services.groups.create_error"));
   }
 
   return {
@@ -151,7 +152,7 @@ export async function getGroupDetails(groupId: string, userId: string) {
     .eq("group_members.user_id", userId)
     .single();
 
-  if (error || !data) throw new Error("Grupo no encontrado");
+  if (error || !data) throw new Error(i18n.t("services.groups.not_found"));
 
   return {
     id: data.id,
@@ -186,7 +187,7 @@ export async function fetchGroupMembersForDelegation(
     .eq("group_id", groupId)
     .neq("user_id", currentUserId);
 
-  if (error) throw new Error("No se pudieron cargar los miembros del grupo.");
+  if (error) throw new Error(i18n.t("services.groups.load_members_error"));
 
   // Typecast since Supabase join returns an array or single object depending on relation
   // users should be an object (or array of 1)
@@ -194,7 +195,7 @@ export async function fetchGroupMembersForDelegation(
     const user = Array.isArray(row.users) ? row.users[0] : row.users;
     return {
       id: row.user_id,
-      first_name: user?.first_name || "Desconocido",
+      first_name: user?.first_name || i18n.t("services.groups.unknown_user"),
       last_name: user?.last_name || "",
       avatar_url: user?.avatar_url || null,
     };

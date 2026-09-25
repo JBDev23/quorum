@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import i18n from "@/lib/i18n";
 
 type SyncPremiumResponse = {
   is_premium: boolean;
@@ -13,7 +14,7 @@ export async function syncPremiumStatus(): Promise<boolean> {
   );
 
   if (error) {
-    throw new Error(error.message || "No se pudo sincronizar el estado Premium.");
+    throw new Error(error.message || i18n.t("services.billing.sync_error"));
   }
 
   if (data?.error) {

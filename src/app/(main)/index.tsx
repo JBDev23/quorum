@@ -3,6 +3,7 @@ import { ActivityIndicator, View, Text, ScrollView, TouchableOpacity } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CalendarClock, ChevronDown, ChevronUp, Settings, Circle, ShieldAlert, User, Box, CalendarX } from "lucide-react-native";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { MeetingCard, type MeetingCardProps } from "@/components/MeetingCard";
 import { useMeetings } from "@/hooks/useMeetings";
@@ -12,6 +13,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { MeetingsSkeleton } from "@/components/skeletons/MeetingsSkeleton";
 
 function ActiveMeetingCard({ meeting }: { meeting: MeetingCardProps }) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const [stats, setStats] = useState<{ accredited: number; totalMembers: number } | null>(null);
 
@@ -28,7 +30,7 @@ function ActiveMeetingCard({ meeting }: { meeting: MeetingCardProps }) {
           bgClass: "bg-primary",
           dotColor: colors.success,
           statusTextClass: "text-primary-foreground",
-          statusLabel: "En curso",
+          statusLabel: t("components.meetingCard.status_active"),
           dateTextClass: "text-primary-foreground/70",
           groupTextClass: "text-primary-foreground/60",
           titleTextClass: "text-primary-foreground",
@@ -46,7 +48,7 @@ function ActiveMeetingCard({ meeting }: { meeting: MeetingCardProps }) {
           bgClass: "bg-warning/15",
           dotColor: colors.warning,
           statusTextClass: "text-warning",
-          statusLabel: "Acreditando",
+          statusLabel: t("components.meetingCard.status_accreditation"),
           dateTextClass: "text-warning",
           groupTextClass: "text-warning",
           titleTextClass: "text-foreground",
@@ -125,7 +127,7 @@ function ActiveMeetingCard({ meeting }: { meeting: MeetingCardProps }) {
             <User size={14} color={roleIconColor} />
           )}
           <Text className={`${config.roleTextClass} text-xs font-bold`}>
-            {isOrg ? "Organizador" : "Participante"}
+            {isOrg ? t("components.meetingCard.role_organizer") : t("components.meetingCard.role_participant")}
           </Text>
         </View>
         <View className="flex-row items-baseline gap-1">
@@ -133,7 +135,7 @@ function ActiveMeetingCard({ meeting }: { meeting: MeetingCardProps }) {
             {accredited}
           </Text>
           <Text className={`${config.totalTextClass} text-xs font-medium`}>
-            /{stats?.totalMembers ?? '-'} acred.
+            /{stats?.totalMembers ?? '-'} {t("main.index.accredited_short")}
           </Text>
         </View>
       </View>
@@ -147,6 +149,7 @@ function ActiveMeetingCard({ meeting }: { meeting: MeetingCardProps }) {
 }
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { meetings, loading, error } = useMeetings();
   const { profile } = useUserProfile();
@@ -175,7 +178,7 @@ export default function HomeScreen() {
   // El historial se invierte para ver las más recientes (ya cerradas) arriba
   const closedMeetings = meetings.filter((m) => m.status === "closed").reverse();
 
-  const firstName = profile?.first_name || "Usuario";
+  const firstName = profile?.first_name || t("main.index.default_user");
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -185,10 +188,10 @@ export default function HomeScreen() {
         <View className="w-full flex-row justify-between items-center bg-background px-4 pt-4 pb-4 z-10">
           <View>
             <Text className="text-xs font-bold text-muted-foreground tracking-wider mb-1 uppercase">
-              Hola, {firstName}
+              {t("main.index.greeting", { name: firstName })}
             </Text>
             <Text className="text-3xl font-extrabold text-foreground">
-              Mis Reuniones
+              {t("main.index.title")}
             </Text>
           </View>
           <TouchableOpacity onPress={() => router.push("/settings")} className="bg-muted p-2.5 rounded-full border border-border">
@@ -207,10 +210,10 @@ export default function HomeScreen() {
                 <CalendarX size={36} color={colors.mutedForeground} />
               </View>
               <Text className="text-xl font-bold text-foreground text-center mb-2">
-                No hay reuniones
+                {t("main.index.empty_title")}
               </Text>
               <Text className="text-sm text-muted-foreground text-center leading-relaxed mb-8">
-                Todavía no te han invitado a ninguna reunión ni has creado ninguna. Para empezar, crea o únete a un grupo.
+                {t("main.index.empty_desc")}
               </Text>
 
               <View className="w-full gap-3">
@@ -218,14 +221,14 @@ export default function HomeScreen() {
                   className="w-full bg-primary py-4 rounded-xl items-center justify-center"
                   onPress={() => router.push('/groups')}
                 >
-                  <Text className="text-primary-foreground font-bold text-base">Crear un grupo</Text>
+                  <Text className="text-primary-foreground font-bold text-base">{t("main.index.btn_create_group")}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   className="w-full bg-muted py-4 rounded-xl items-center justify-center border border-border"
                   onPress={() => router.push('/groups')}
                 >
-                  <Text className="text-foreground font-bold text-base">Unirme a un grupo</Text>
+                  <Text className="text-foreground font-bold text-base">{t("main.index.btn_join_group")}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -238,7 +241,7 @@ export default function HomeScreen() {
                   <View className="flex-row items-center gap-2 mb-4">
                     <Circle size={8} fill={colors.success} color={colors.success} />
                     <Text className="text-[11px] font-bold text-success tracking-widest uppercase">
-                      Requieren atención
+                      {t("main.index.section_attention")}
                     </Text>
                   </View>
 
@@ -256,7 +259,7 @@ export default function HomeScreen() {
                   <View className="flex-row items-center gap-2 mb-4">
                     <CalendarClock size={20} color={colors.warning} />
                     <Text className="text-sm font-bold text-foreground uppercase tracking-widest">
-                      Próximas
+                      {t("main.index.section_scheduled")}
                     </Text>
                   </View>
                   <View className="gap-4">
@@ -273,7 +276,7 @@ export default function HomeScreen() {
                   <View className="flex-row items-center gap-2 mb-4">
                     <CalendarClock size={16} color={colors.mutedForeground} />
                     <Text className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                      Borradores
+                      {t("main.index.section_drafts")}
                     </Text>
                   </View>
                   <View className="gap-4">
@@ -293,7 +296,7 @@ export default function HomeScreen() {
                 >
                   <View className="flex-row items-center gap-3">
                     <Box size={20} color={colors.mutedForeground} />
-                    <Text className="text-base font-bold text-foreground">Historial</Text>
+                    <Text className="text-base font-bold text-foreground">{t("main.index.section_history")}</Text>
                     <View className="bg-muted px-2 py-0.5 rounded-full">
                       <Text className="text-muted-foreground text-xs font-bold">{closedMeetings.length || 0}</Text>
                     </View>
@@ -315,7 +318,7 @@ export default function HomeScreen() {
                         ))}
                       </View>
                     ) : (
-                      <Text className="text-muted-foreground text-center mt-4">No hay historial reciente</Text>
+                      <Text className="text-muted-foreground text-center mt-4">{t("main.index.history_empty")}</Text>
                     )}
                   </View>
                 )}

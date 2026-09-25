@@ -9,6 +9,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { Poll } from "./polls";
 import { fetchDelegationsToMe, fetchMyDelegation } from "./delegations";
+import i18n from "@/lib/i18n";
 
 const receiptKey = (pollId: string) => `vote-receipt:${pollId}`;
 
@@ -41,7 +42,7 @@ export async function getActivePoll(meetingId: string): Promise<Poll | null> {
     .limit(1)
     .maybeSingle();
 
-  if (error) mapLoadError(error, "Error al buscar votaciones activas");
+  if (error) mapLoadError(error, i18n.t("services.votes.load_active_error"));
   return data as Poll | null;
 }
 
@@ -56,7 +57,7 @@ export async function hasUserVoted(
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (error) mapLoadError(error, "No se pudo comprobar si ya has votado");
+  if (error) mapLoadError(error, i18n.t("services.votes.load_has_voted_error"));
   return !!data;
 }
 
@@ -71,7 +72,7 @@ export async function isUserAccredited(
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (error) mapLoadError(error, "No se pudo verificar la acreditación");
+  if (error) mapLoadError(error, i18n.t("services.votes.load_accreditation_error"));
   return !!data;
 }
 
@@ -83,7 +84,7 @@ export async function getMeetingSettings(meetingId: string) {
     .single();
 
   if (error) {
-    mapLoadError(error, "No se pudo cargar la configuración de la reunión");
+    mapLoadError(error, i18n.t("services.votes.load_settings_error"));
   }
   return {
     allowBlankVotes: !!data.allow_blank_votes,
@@ -135,36 +136,36 @@ function mapCastBallotError(error: unknown): string {
   const message = errorMessage(error);
 
   if (message.includes("ERR_ALREADY_VOTED")) {
-    return "Ya has votado en esta encuesta.";
+    return i18n.t("services.votes.already_voted");
   }
   if (message.includes("ERR_NOT_ACCREDITED")) {
-    return "Debes estar acreditado para votar.";
+    return i18n.t("services.votes.not_accredited");
   }
   if (message.includes("ERR_POLL_CLOSED")) {
-    return "Esta votación ya no está abierta.";
+    return i18n.t("services.votes.poll_closed");
   }
   if (message.includes("ERR_MEETING_INACTIVE")) {
-    return "La reunión no está en fase activa.";
+    return i18n.t("services.votes.meeting_inactive");
   }
   if (message.includes("ERR_BLANK_NOT_ALLOWED")) {
-    return "Los votos en blanco no están permitidos en esta reunión.";
+    return i18n.t("services.votes.blank_not_allowed");
   }
   if (message.includes("ERR_INVALID_OPTION")) {
-    return "La opción seleccionada no es válida.";
+    return i18n.t("services.votes.invalid_option");
   }
   if (message.includes("ERR_NOT_AUTHORIZED_DELEGATE")) {
-    return "No estás autorizado a votar en nombre de esa persona.";
+    return i18n.t("services.votes.not_authorized_delegate");
   }
   if (message.includes("ERR_VOTE_DELEGATED")) {
-    return "Has delegado tu voto. No puedes votar en esta urna.";
+    return i18n.t("services.votes.vote_delegated");
   }
   if (message.includes("ERR_NOT_AUTHENTICATED")) {
-    return "Sesión expirada. Vuelve a iniciar sesión.";
+    return i18n.t("services.votes.session_expired");
   }
   if (message.includes("ERR_RECEIPT_REQUIRED") || message.includes("ERR_POLL_NOT_FOUND")) {
-    return "No se pudo emitir el voto.";
+    return i18n.t("services.votes.vote_error");
   }
-  return "No se pudo emitir el voto.";
+  return i18n.t("services.votes.vote_error");
 }
 
 function mapLoadError(error: unknown, fallback: string): never {
@@ -213,17 +214,17 @@ export async function castVote({
     if (
       error instanceof Error &&
       (error.message === NETWORK_VOTE_MESSAGE ||
-        error.message.startsWith("Ya has") ||
-        error.message.startsWith("Debes") ||
-        error.message.startsWith("Esta") ||
-        error.message.startsWith("La reunión") ||
-        error.message.startsWith("Los votos") ||
-        error.message.startsWith("La opción") ||
-        error.message.startsWith("Selecciona") ||
-        error.message.startsWith("Sesión") ||
-        error.message.startsWith("Has delegado") ||
-        error.message.startsWith("No estás autorizado") ||
-        error.message === "No se pudo emitir el voto.")
+        error.message === i18n.t("services.votes.already_voted") ||
+        error.message === i18n.t("services.votes.not_accredited") ||
+        error.message === i18n.t("services.votes.poll_closed") ||
+        error.message === i18n.t("services.votes.meeting_inactive") ||
+        error.message === i18n.t("services.votes.blank_not_allowed") ||
+        error.message === i18n.t("services.votes.invalid_option") ||
+        error.message === i18n.t("services.votes.not_authorized_delegate") ||
+        error.message === i18n.t("services.delegations.delegate_required") ||
+        error.message === i18n.t("services.votes.vote_delegated") ||
+        error.message === i18n.t("services.votes.session_expired") ||
+        error.message === i18n.t("services.votes.vote_error"))
     ) {
       throw error;
     }
@@ -294,7 +295,7 @@ export async function loadVotingContext(
           : [
               {
                 id: userId,
-                name: "Mi voto",
+                name: i18n.t("services.votes.my_vote"),
                 hasVoted: votedIds.has(userId),
               },
             ]),

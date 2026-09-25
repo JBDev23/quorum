@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, Pressable } from "react-native";
 import { ShieldAlert, User, QrCode, Trash, ChevronRight } from "lucide-react-native";
 import type { GroupListItem } from "@/services/groups";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { alert } from "@/components/Alert";
 import { useThemeColors } from "@/theme/useThemeColors";
 
@@ -12,18 +13,19 @@ interface GroupCardProps {
 }
 
 export function GroupCard({ group, onLeave, onShare }: GroupCardProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const isOrganizer = group.role === "organizer";
 
   const handleLeave = () => {
     if (isOrganizer) {
       alert(
-        "Eliminar Grupo",
-        `Eres el organizador. Si eliminas "${group.name}", se borrará todo el historial de reuniones y votaciones para todos los participantes. Esta acción no se puede deshacer.`,
+        t("components.groupCard.delete_title"),
+        t("components.groupCard.delete_desc", { name: group.name }),
         [
-          { text: "Cancelar", style: "cancel" },
+          { text: t("common.cancel"), style: "cancel" },
           {
-            text: "Eliminar Grupo",
+            text: t("components.groupCard.delete_btn"),
             style: "destructive",
             onPress: () => onLeave(group.id, true),
           },
@@ -31,12 +33,12 @@ export function GroupCard({ group, onLeave, onShare }: GroupCardProps) {
       );
     } else {
       alert(
-        "Salir del grupo",
-        `¿Estás seguro de que quieres salir de "${group.name}"?`,
+        t("components.groupCard.leave_title"),
+        t("components.groupCard.leave_desc", { name: group.name }),
         [
-          { text: "Cancelar", style: "cancel" },
+          { text: t("common.cancel"), style: "cancel" },
           {
-            text: "Salir",
+            text: t("components.groupCard.leave_btn"),
             style: "destructive",
             onPress: () => onLeave(group.id, false),
           },
@@ -99,13 +101,13 @@ export function GroupCard({ group, onLeave, onShare }: GroupCardProps) {
                 : "text-muted-foreground text-xs font-medium"
             }
           >
-            {isOrganizer ? "Organizador" : "Participante"}
+            {isOrganizer ? t("components.groupCard.role_organizer") : t("components.groupCard.role_participant")}
           </Text>
         </View>
 
         {isOrganizer && (
           <Text className="text-muted-foreground text-xs font-medium mt-1">
-            PIN <Text className="font-bold text-muted-foreground">{group.invitePin}</Text>
+            {t("components.groupCard.pin")} <Text className="font-bold text-muted-foreground">{group.invitePin}</Text>
           </Text>
         )}
       </View>

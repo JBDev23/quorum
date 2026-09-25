@@ -1,5 +1,6 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -43,6 +44,7 @@ export function MeetingClosedResults({
   const [isExportModalVisible, setIsExportModalVisible] = useState(false);
   const [isCheckingPremium, setIsCheckingPremium] = useState(false);
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const handleExportPress = async () => {
     if (!user) return;
@@ -51,18 +53,18 @@ export function MeetingClosedResults({
       const profile = await getUserProfile(user.id);
       if (!profile.is_premium) {
         alert(
-          "Función Premium",
-          "La exportación de resultados es una función exclusiva para usuarios Premium. ¡Mejora tu cuenta para acceder a esta y otras ventajas!",
+          t("voting.closed_results.premium_title"),
+          t("voting.closed_results.premium_msg"),
           [
-            { text: "Cancelar", style: "cancel" },
-            { text: "Mejorar a Premium", onPress: openPremiumPaywall },
+            { text: t("common.cancel"), style: "cancel" },
+            { text: t("voting.closed_results.premium_upgrade"), onPress: openPremiumPaywall },
           ]
         );
         return;
       }
       setIsExportModalVisible(true);
     } catch (err) {
-      alert("Error", "No se pudo verificar el estado de tu cuenta.");
+      alert("Error", t("voting.closed_results.premium_error"));
     } finally {
       setIsCheckingPremium(false);
     }
@@ -83,7 +85,7 @@ export function MeetingClosedResults({
         setError(
           err instanceof Error
             ? err.message
-            : "No se pudieron cargar los resultados"
+            : t("voting.closed_results.load_error")
         );
       } finally {
         if (showSpinner) setLoading(false);
@@ -151,7 +153,7 @@ export function MeetingClosedResults({
             onPress={() => void refresh(true)}
             className="bg-muted px-6 py-3 rounded-full"
           >
-            <Text className="text-foreground font-semibold">Reintentar</Text>
+            <Text className="text-foreground font-semibold">{t("common.retry")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -179,19 +181,19 @@ export function MeetingClosedResults({
                 ) : (
                   <Download size={18} color={colors.primary} />
                 )}
-                <Text className="text-primary font-medium ml-2">Exportar</Text>
+                <Text className="text-primary font-medium ml-2">{t("voting.export_modal.title").split(" ")[0]}</Text>
               </TouchableOpacity>
             )}
           </View>
           <View className="items-center">
             <CheckCircle2 size={48} color="#22c55e" className="mb-4" />
             <Text className="text-foreground text-2xl font-bold text-center mb-2">
-              {status === "closed" ? "Reunión finalizada" : "Resultados"}
+              {status === "closed" ? t("meeting.organizer.phases.closed.results_title") : t("voting.closed_results.title")}
             </Text>
             <Text className="text-muted-foreground text-center text-base">
               {status === "closed"
-                ? "Resultados de las votaciones de esta asamblea."
-                : "Resultados de las votaciones ya cerradas."}
+                ? t("meeting.organizer.phases.closed.results_subtitle")
+                : t("voting.closed_results.subtitle")}
             </Text>
           </View>
         </View>
@@ -203,10 +205,10 @@ export function MeetingClosedResults({
                 <Inbox size={32} color="#a3a3a3" />
               </View>
               <Text className="text-foreground text-[19px] font-bold text-center mb-2">
-                Sin resultados
+                {t("voting.closed_results.empty_title")}
               </Text>
               <Text className="text-muted-foreground text-center text-[15px] leading-6 px-4">
-                No hay votaciones cerradas en esta reunión.
+                {t("voting.closed_results.empty_desc")}
               </Text>
             </View>
           ) : (

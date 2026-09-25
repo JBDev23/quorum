@@ -15,3 +15,6 @@ verify_jwt = true
 # Called from Postgres triggers (pg_net) with x-push-secret
 [functions.dispatch-push]
 verify_jwt = false
+
+[global]
+enable_confirmations = false

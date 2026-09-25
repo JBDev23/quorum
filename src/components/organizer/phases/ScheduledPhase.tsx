@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { Play, ListTodo } from "lucide-react-native";
 
@@ -20,6 +21,7 @@ export function ScheduledPhase({
   meetingId,
   onStatusUpdated,
 }: ScheduledPhaseProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { isUpdating, confirmAndApply } = useMeetingStatusChange(
     meetingId,
@@ -28,10 +30,9 @@ export function ScheduledPhase({
 
   const handleOpenDoors = () => {
     confirmAndApply("accreditation", {
-      title: "Abrir Acreditaciones",
-      message:
-        "Los participantes podrán acreditarse con su código QR. ¿Continuar?",
-      confirmLabel: "Sí, abrir puertas",
+      title: t("meeting.organizer.phases.scheduled.open_doors_title"),
+      message: t("meeting.organizer.phases.scheduled.open_doors_msg"),
+      confirmLabel: t("meeting.organizer.phases.scheduled.open_doors_confirm"),
     });
   };
 
@@ -39,16 +40,15 @@ export function ScheduledPhase({
     <View>
       <View className="gap-4 mb-8">
         <Text className="text-muted-foreground mb-2">
-          La reunión está publicada. Los participantes ven la fecha pero aún no
-          pueden acreditar ni votar. Puedes seguir editando encuestas y ajustes.
+          {t("meeting.organizer.dashboard.desc_scheduled")}
         </Text>
 
         <PanelActionRow
-          title="Preguntas y Encuestas"
-          subtitle="Redacta o edita lo que se va a votar"
+          title={t("meeting.organizer.phases.scheduled.polls_title")}
+          subtitle={t("meeting.organizer.phases.scheduled.polls_subtitle")}
           icon={<ListTodo size={24} color={colors.secondary} />}
           onPress={() =>
-            router.push(`/meeting/${meetingId}/organizer/surveys`)
+            router.push(`/meeting/${meetingId}/organizer/polls`)
           }
         />
 
@@ -58,11 +58,11 @@ export function ScheduledPhase({
       </View>
 
       <PhasePrimaryButton
-        label="Abrir Acreditaciones"
+        label={t("meeting.organizer.phases.scheduled.open_doors_btn")}
         onPress={handleOpenDoors}
         loading={isUpdating}
         icon={<Play color="white" size={20} fill="white" />}
-        hint="Al abrir las puertas, el escáner se activará y los participantes podrán mostrar su código QR."
+        hint={t("meeting.organizer.phases.scheduled.open_doors_hint")}
       />
     </View>
   );

@@ -1,5 +1,7 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { supabase } from "@/lib/supabase";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -17,16 +19,16 @@ import {
   createPoll,
   deletePoll,
   updatePollStatus,
-  POLL_TYPE_LABELS,
   type Poll,
   type PollType,
 } from "@/services/polls";
 import { ActivePollStats } from "@/components/ActivePollStats";
 import { ClosedPollResults } from "@/components/ClosedPollResults";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { SurveysSkeleton } from "@/components/skeletons/SurveysSkeleton";
+import { PollsSkeleton } from "@/components/skeletons/PollsSkeleton";
 
-export default function SurveysScreen() {
+export default function PollsScreen() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const { meetingId, status } = useMeeting();
 
@@ -49,15 +51,44 @@ export default function SurveysScreen() {
       const data = await fetchPolls(meetingId);
       setPolls(data);
     } catch {
-      alert("Error", "No se pudieron cargar las preguntas.");
+      alert("Error", t("meeting.organizer.polls.error_load"));
     } finally {
       setLoading(false);
     }
   }, [meetingId]);
 
+  const loadPollsRef = useRef(loadPolls);
   useEffect(() => {
-    loadPolls();
+    loadPollsRef.current = loadPolls;
   }, [loadPolls]);
+
+  useEffect(() => {
+    void loadPollsRef.current();
+
+    if (!meetingId) return;
+
+    const channel = supabase
+      .channel(`polls-organizer-${meetingId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "polls",
+          filter: `meeting_id=eq.${meetingId}`,
+        },
+        () => {
+          void loadPollsRef.current();
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") void loadPollsRef.current();
+      });
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [meetingId]);
 
   const handleCreatePoll = async (input: {
     title: string;
@@ -81,19 +112,19 @@ export default function SurveysScreen() {
 
   const handleDelete = (pollId: string) => {
     alert(
-      "Eliminar pregunta",
-      "¿Estás seguro de que quieres borrar esta pregunta?",
+      t("meeting.organizer.polls.delete_title"),
+      t("meeting.organizer.polls.delete_warning"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Eliminar",
+          text: t("meeting.organizer.polls.delete_action"),
           style: "destructive",
           onPress: async () => {
             try {
               await deletePoll(pollId);
               setPolls((prev) => prev.filter((p) => p.id !== pollId));
             } catch {
-              alert("Error", "No se pudo eliminar.");
+              alert("Error", t("meeting.organizer.polls.error_delete"));
             }
           },
         },
@@ -111,16 +142,16 @@ export default function SurveysScreen() {
       polls.some((p) => p.id !== pollId && p.status === "active");
 
     alert(
-      newStatus === "active" ? "Lanzar Votación" : "Cerrar Votación",
+      newStatus === "active" ? t("meeting.organizer.polls.launch_title") : t("meeting.organizer.polls.close_title"),
       newStatus === "active"
         ? hasOtherActive
-          ? "Hay otra votación en curso. Se cerrará automáticamente al lanzar esta. ¿Continuar?"
-          : "Los participantes acreditados podrán empezar a votar. ¿Continuar?"
-        : "¿Seguro que quieres cerrar esta votación? Ya no se admitirán más votos.",
+          ? t("meeting.organizer.polls.launch_warning_other")
+          : t("meeting.organizer.polls.launch_warning")
+        : t("meeting.organizer.polls.close_warning"),
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: newStatus === "active" ? "Lanzar" : "Cerrar",
+          text: newStatus === "active" ? t("meeting.organizer.polls.launch_action") : t("meeting.organizer.polls.close_action"),
           style: newStatus === "closed" ? "destructive" : "default",
           onPress: async () => {
             try {
@@ -135,7 +166,7 @@ export default function SurveysScreen() {
                 }),
               );
             } catch {
-              alert("Error", `No se pudo ${actionText} la votación.`);
+              alert("Error", newStatus === "active" ? t("meeting.organizer.polls.error_action_launch") : t("meeting.organizer.polls.error_action_close"));
             }
           },
         },
@@ -149,10 +180,10 @@ export default function SurveysScreen() {
         <View className="w-full bg-card px-4 pt-4 pb-4 z-10 flex-row justify-between items-end mb-2">
           <View className="flex-1 pr-3">
             <Text className="text-3xl font-bold text-foreground mb-1">
-              Encuestas
+              {t("meeting.organizer.polls.title")}
             </Text>
             <Text className="text-muted-foreground text-base">
-              Orden del día a votar
+              {t("meeting.organizer.polls.subtitle")}
             </Text>
           </View>
 
@@ -171,24 +202,23 @@ export default function SurveysScreen() {
           {!isMeetingActive && polls.length > 0 && (
             <View className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl mb-4">
               <Text className="text-amber-500 text-sm text-center">
-                Podrás lanzar las votaciones cuando la asamblea pase a fase
-                "Activa".
+                {t("meeting.organizer.polls.cant_launch")}
               </Text>
             </View>
           )}
 
           {loading ? (
-            <SurveysSkeleton />
+            <PollsSkeleton />
           ) : polls.length === 0 ? (
             <View className="bg-card border border-border rounded-2xl p-8 items-center mt-4">
               <HelpCircle size={48} color="#525252" className="mb-4" />
               <Text className="text-foreground text-lg font-bold text-center mb-2">
-                Ninguna pregunta
+                {status === "draft" ? t("meeting.organizer.polls.no_polls") : t("meeting.organizer.polls.no_polls_yet")}
               </Text>
               <Text className="text-muted-foreground text-center">
-                {canEdit
-                  ? "Añade los puntos que los participantes deberán votar."
-                  : "Esta reunión aún no tiene encuestas."}
+                {canEdit && status === "draft"
+                  ? t("meeting.organizer.polls.add_polls_desc")
+                  : ""}
               </Text>
             </View>
           ) : (
@@ -205,26 +235,27 @@ export default function SurveysScreen() {
                     <View className="flex-1 pr-4">
                       <View className="flex-row flex-wrap items-center gap-2 mb-2">
                         <Text className="text-[#6A7398] font-bold text-xs uppercase tracking-widest">
-                          VOTACIÓN {index + 1}
+                          {t("meeting.organizer.polls.poll_label")} {index + 1}
                         </Text>
                         <View className="bg-card px-2 py-0.5 rounded-md shadow-sm border border-border">
                           <Text className="text-slate-600 text-xs font-bold">
-                            {POLL_TYPE_LABELS[poll.type]}
+                            {poll.type === "yes_no" 
+                              ? t("services.polls.type_yes_no") 
+                              : t("services.polls.type_multiple")}
                           </Text>
                         </View>
 
-                        {/* Banderas de estado visuales */}
                         {poll.status === "active" && (
                           <View className="bg-[#E5F7ED] px-2 py-0.5 rounded-full">
                             <Text className="text-[#00B368] text-[11px] font-bold">
-                              EN CURSO
+                              {t("meeting.organizer.polls.active_badge")}
                             </Text>
                           </View>
                         )}
                         {poll.status === "closed" && (
                           <View className="bg-muted px-2 py-0.5 rounded-full ml-auto">
                             <Text className="text-muted-foreground text-[11px] font-bold">
-                              FINALIZADA
+                              {t("meeting.organizer.polls.closed_badge")}
                             </Text>
                           </View>
                         )}
@@ -282,7 +313,7 @@ export default function SurveysScreen() {
                       <Text
                         className={`font-bold ${isMeetingActive ? "text-primary-foreground" : "text-muted-foreground"}`}
                       >
-                        Lanzar Votación
+                        {t("meeting.organizer.polls.launch_btn")}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -294,7 +325,7 @@ export default function SurveysScreen() {
                     >
                       <View className="w-2 h-2 bg-[#E92E46] rounded-full" />
                       <Text className="text-[#E92E46] font-bold text-base">
-                        Cerrar Votación
+                        {t("meeting.organizer.polls.close_btn")}
                       </Text>
                     </TouchableOpacity>
                   )}

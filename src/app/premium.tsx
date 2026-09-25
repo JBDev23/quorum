@@ -30,6 +30,7 @@ import { useAuth } from "@/lib/auth";
 import { syncPremiumStatus } from "@/services/billing";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { PremiumSkeleton } from "@/components/skeletons/PremiumSkeleton";
+import { useTranslation } from "react-i18next";
 
 export default function PremiumPaywallScreen() {
   const { user } = useAuth();
@@ -39,6 +40,7 @@ export default function PremiumPaywallScreen() {
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetchOfferings() {
@@ -74,8 +76,8 @@ export default function PremiumPaywallScreen() {
   const finishWithPremium = useCallback(async (granted: boolean) => {
     if (!granted) {
       alert(
-        "Compra registrada",
-        "La tienda confirmó el pago, pero el acceso Premium aún no está activo. Prueba «Restaurar compras» en unos segundos."
+        t("premium.alert_registered_title"),
+        t("premium.alert_registered_msg")
       );
       return;
     }
@@ -84,19 +86,19 @@ export default function PremiumPaywallScreen() {
       const isPremium = await syncPremiumStatus();
       if (!isPremium) {
         alert(
-          "Sincronizando…",
-          "Tu compra está confirmada. El acceso Premium puede tardar unos segundos en reflejarse."
+          t("premium.alert_sync_title"),
+          t("premium.alert_sync_msg")
         );
         return;
       }
 
-      alert("¡Gracias!", "Tu cuenta ha sido mejorada con éxito.", [
-        { text: "Continuar", onPress: () => router.back() },
+      alert(t("premium.alert_thanks_title"), t("premium.alert_thanks_msg"), [
+        { text: t("common.continue", "Continuar"), onPress: () => router.back() },
       ]);
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : "No se pudo sincronizar Premium.";
-      alert("Error de sincronización", message);
+        error instanceof Error ? error.message : t("premium.alert_sync_error_default");
+      alert(t("premium.alert_sync_error"), message);
     }
   }, []);
 
@@ -112,8 +114,8 @@ export default function PremiumPaywallScreen() {
     } catch (error: any) {
       if (!error.userCancelled) {
         alert(
-          "Error de compra",
-          error.message ?? "No se pudo completar la compra."
+          t("premium.alert_purchase_error"),
+          error.message ?? t("premium.alert_purchase_error_default")
         );
       }
     } finally {
@@ -132,8 +134,8 @@ export default function PremiumPaywallScreen() {
 
       if (!hasPremium) {
         alert(
-          "Sin compras",
-          "No encontramos una suscripción Premium activa para restaurar."
+          t("premium.alert_no_purchase_title"),
+          t("premium.alert_no_purchase_msg")
         );
         return;
       }
@@ -141,8 +143,8 @@ export default function PremiumPaywallScreen() {
       await finishWithPremium(true);
     } catch (error: any) {
       alert(
-        "Error al restaurar",
-        error.message ?? "No se pudieron restaurar las compras."
+        t("premium.alert_restore_error"),
+        error.message ?? t("premium.alert_restore_error_default")
       );
     } finally {
       setPurchasing(false);
@@ -153,13 +155,13 @@ export default function PremiumPaywallScreen() {
     switch (pkg.packageType) {
       case PACKAGE_TYPE.ANNUAL:
         return {
-          badge: "Ahorras un 33%",
-          suffix: " /mes",
+          badge: t("premium.badge_annual"),
+          suffix: t("premium.suffix_month"),
         };
       case PACKAGE_TYPE.MONTHLY:
         return {
           badge: null,
-          suffix: " /mes",
+          suffix: t("premium.suffix_month"),
         };
       default:
         return {
@@ -197,10 +199,10 @@ export default function PremiumPaywallScreen() {
               <View className="flex-row items-center gap-2">
                 <View className="bg-primary-foreground/20 px-2 py-0.5 rounded">
                   <Text className="text-primary-foreground text-xs font-black tracking-widest">
-                    PRO
+                    {t("voting.hardcoded.pro")}
                   </Text>
                 </View>
-                <Text className="text-primary-foreground font-bold text-lg">quorum Pro</Text>
+                <Text className="text-primary-foreground font-bold text-lg">{t("premium.title")}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => router.back()}
@@ -211,28 +213,27 @@ export default function PremiumPaywallScreen() {
             </View>
 
             <Text className="text-primary-foreground text-3xl font-extrabold mb-2">
-              Asambleas sin{"\n"}restricciones
+              {t("premium.subtitle")}
             </Text>
             <Text className="text-primary-foreground/80 text-base mb-8 leading-6">
-              Desbloquea el límite de 15 participantes y las herramientas de
-              exportación y delegaciones.
+              {t("premium.description")}
             </Text>
 
             <View className="flex-row bg-white/10 rounded-2xl">
               <View className="flex-1 items-center py-4 border-r border-white/10">
                 <InfinityIcon size={24} color="white" className="mb-2" />
-                <Text className="text-primary-foreground font-bold text-sm">Sin límite</Text>
-                <Text className="text-white/60 text-xs mt-0.5">participantes</Text>
+                <Text className="text-primary-foreground font-bold text-sm">{t("premium.feature_participants")}</Text>
+                <Text className="text-white/60 text-xs mt-0.5">{t("premium.feature_participants_desc")}</Text>
               </View>
               <View className="flex-1 items-center py-4 border-r border-white/10">
                 <FileText size={24} color="white" className="mb-2" />
-                <Text className="text-primary-foreground font-bold text-sm">PDF + CSV</Text>
-                <Text className="text-white/60 text-xs mt-0.5">exportación</Text>
+                <Text className="text-primary-foreground font-bold text-sm">{t("premium.feature_export")}</Text>
+                <Text className="text-white/60 text-xs mt-0.5">{t("premium.feature_export_desc")}</Text>
               </View>
               <View className="flex-1 items-center py-4">
                 <Users size={24} color="white" className="mb-2" />
-                <Text className="text-primary-foreground font-bold text-sm">Delegaciones</Text>
-                <Text className="text-white/60 text-xs mt-0.5">y apoderados</Text>
+                <Text className="text-primary-foreground font-bold text-sm">{t("premium.feature_delegations")}</Text>
+                <Text className="text-white/60 text-xs mt-0.5">{t("premium.feature_delegations_desc")}</Text>
               </View>
             </View>
           </View>
@@ -249,10 +250,10 @@ export default function PremiumPaywallScreen() {
                   <AlertCircle size={32} color="#a3a3a3" />
                 </View>
                 <Text className="text-foreground text-[19px] font-bold text-center mb-2">
-                  Planes no disponibles
+                  {t("premium.no_plans")}
                 </Text>
                 <Text className="text-muted-foreground text-center text-[15px] leading-6 px-4">
-                  No se han podido cargar los planes en este momento. Inténtalo más tarde.
+                  {t("premium.no_plans_desc")}
                 </Text>
               </View>
             ) : (
@@ -318,7 +319,7 @@ export default function PremiumPaywallScreen() {
                   className="w-full bg-[#4338ca] rounded-2xl py-4 flex-row items-center justify-center mt-6 shadow-md"
                 >
                   <Text className="text-primary-foreground font-bold text-base mr-2">
-                    Activar {selectedPackage?.product.title || "Premium"}
+                    {t("premium.activate", { title: selectedPackage?.product.title || "Premium" })}
                   </Text>
                   <ArrowRight size={20} color="white" />
                 </TouchableOpacity>
@@ -331,7 +332,7 @@ export default function PremiumPaywallScreen() {
               className="mt-8 py-3"
             >
               <Text className="text-muted-foreground text-center text-sm font-medium underline">
-                Restaurar compras
+                {t("premium.restore")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -341,7 +342,7 @@ export default function PremiumPaywallScreen() {
           <View className="absolute inset-0 bg-background/90 justify-center items-center z-50">
             <ActivityIndicator color={colors.primary} size="large" />
             <Text className="text-primary font-bold mt-4 text-lg">
-              Procesando pago seguro...
+              {t("premium.processing")}
             </Text>
           </View>
         )}

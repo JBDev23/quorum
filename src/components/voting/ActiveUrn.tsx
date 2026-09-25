@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Vote, Check } from "lucide-react-native";
 import { alert } from "@/components/Alert";
@@ -16,37 +17,38 @@ interface ActiveUrnProps {
   onVote: (optionId: string, isBlank: boolean) => Promise<void>;
 }
 
-const getOptionConfig = (text?: string, isBlank = false) => {
-  if (isBlank) return {
-    appBg: "bg-background",
-    cardBg: "bg-muted-foreground",
-    subtitle: "Sin posición"
-  };
-  const normalized = text?.toLowerCase() || "";
-  if (normalized === "sí" || normalized === "si" || normalized.includes("favor")) {
-    return {
-      appBg: "bg-background",
-      cardBg: "bg-secondary",
-      subtitle: "A favor",
-    };
-  }
-  if (normalized === "no" || normalized.includes("contra")) {
-    return {
-      appBg: "bg-destructive/10",
-      cardBg: "bg-destructive",
-      subtitle: "En contra",
-    };
-  }
-  return {
-    appBg: "bg-background",
-    cardBg: "bg-primary",
-    subtitle: "Sin posición"
-  };
-};
-
 export function ActiveUrn({ poll, allowBlankVotes, groupName, votingForName, onVote }: ActiveUrnProps) {
+  const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getOptionConfig = (text?: string, isBlank = false) => {
+    if (isBlank) return {
+      appBg: "bg-background",
+      cardBg: "bg-muted-foreground",
+      subtitle: t("voting.active_urn.no_position")
+    };
+    const normalized = text?.toLowerCase() || "";
+    if (normalized === "sí" || normalized === "si" || normalized.includes("favor") || normalized === "yes") {
+      return {
+        appBg: "bg-background",
+        cardBg: "bg-secondary",
+        subtitle: t("voting.active_urn.in_favor"),
+      };
+    }
+    if (normalized === "no" || normalized.includes("contra") || normalized.includes("against")) {
+      return {
+        appBg: "bg-destructive/10",
+        cardBg: "bg-destructive",
+        subtitle: t("voting.active_urn.against"),
+      };
+    }
+    return {
+      appBg: "bg-background",
+      cardBg: "bg-primary",
+      subtitle: t("voting.active_urn.no_position")
+    };
+  };
 
   const handleSelect = (id: string) => {
     void selectionHaptic();
@@ -58,18 +60,18 @@ export function ActiveUrn({ poll, allowBlankVotes, groupName, votingForName, onV
 
     // Obtenemos el texto de lo que ha seleccionado para la doble confirmación
     const optionText = selectedOption === BLANK_SENTINEL
-      ? "Voto en blanco"
+      ? t("voting.active_urn.blank_vote")
       : poll.poll_options?.find(o => o.id === selectedOption)?.text;
 
     void impactHaptic();
 
     alert(
-      "Confirmar Voto",
-      `Vas a votar:\n\n"${optionText}"\n\nEsta acción es irreversible. ¿Estás seguro?`,
+      t("voting.active_urn.confirm_title"),
+      t("voting.active_urn.confirm_msg", { option: optionText }),
       [
-        { text: "Modificar", style: "cancel" },
+        { text: t("voting.active_urn.modify"), style: "cancel" },
         {
-          text: "Sí, Depositar Voto",
+          text: t("voting.active_urn.confirm_btn"),
           onPress: async () => {
             setIsSubmitting(true);
             try {
@@ -94,8 +96,8 @@ export function ActiveUrn({ poll, allowBlankVotes, groupName, votingForName, onV
   const appBgClass = activeConfig ? activeConfig.appBg : "bg-background";
   const buttonBgClass = activeConfig ? activeConfig.cardBg : "bg-muted";
   const buttonText = selectedOption
-    ? `Depositar Voto: ${selectedOption === BLANK_SENTINEL ? "En blanco" : poll.poll_options?.find((o) => o.id === selectedOption)?.text}`
-    : "Selecciona una opción";
+    ? `${t("voting.active_urn.deposit_vote")}: ${selectedOption === BLANK_SENTINEL ? t("voting.active_urn.in_blank") : poll.poll_options?.find((o) => o.id === selectedOption)?.text}`
+    : t("voting.active_urn.select_option");
   const buttonTextColor = selectedOption
     ? activeConfig?.cardBg === "bg-secondary"
       ? "text-secondary-foreground"
@@ -112,12 +114,12 @@ export function ActiveUrn({ poll, allowBlankVotes, groupName, votingForName, onV
           <View className="px-6 pt-16 pb-8">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-muted-foreground font-bold text-[10px] tracking-widest uppercase flex-1 mr-2">
-                {groupName?.toUpperCase() ?? "COMUNIDAD DE VECINOS"}
+                {groupName?.toUpperCase() ?? t("voting.active_urn.community")}
               </Text>
               <View className="bg-secondary/10 px-2 py-1 rounded-full border border-secondary/30 flex-row items-center gap-1.5">
                 <View className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
                 <Text className="text-secondary font-bold text-[9px] tracking-widest uppercase">
-                  Votación en curso
+                  {t("voting.active_urn.voting_in_progress")}
                 </Text>
               </View>
             </View>
@@ -127,7 +129,7 @@ export function ActiveUrn({ poll, allowBlankVotes, groupName, votingForName, onV
             {votingForName && (
               <View className="mt-3 bg-primary/10 self-start px-3 py-1.5 rounded-full border border-primary/20">
                 <Text className="text-primary font-bold text-[12px]">
-                  👤 Votando en nombre de: {votingForName}
+                  {t("voting.active_urn.voting_on_behalf", { name: votingForName })}
                 </Text>
               </View>
             )}
@@ -193,11 +195,11 @@ export function ActiveUrn({ poll, allowBlankVotes, groupName, votingForName, onV
                 <View className="flex-1 pr-4">
                   <Text className={`text-xl font-extrabold mb-1 ${selectedOption === BLANK_SENTINEL ? "text-primary-foreground" : "text-foreground"
                     }`}>
-                    Voto en blanco
+                    {t("voting.active_urn.blank_vote")}
                   </Text>
                   <Text className={`text-[15px] ${selectedOption === BLANK_SENTINEL ? "text-primary-foreground/80" : "text-muted-foreground"
                     }`}>
-                    Sin posición
+                    {t("voting.active_urn.no_position")}
                   </Text>
                 </View>
                 <View className={`w-8 h-8 rounded-full border items-center justify-center ${selectedOption === BLANK_SENTINEL ? "border-border" : "border-border"

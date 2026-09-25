@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Redirect, Tabs } from "expo-router";
 import { LayoutDashboard, UserCheck, Inbox, PieChart, Users } from "lucide-react-native";
 
@@ -9,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 export default function MemberMeetingLayout() {
+  const { t } = useTranslation();
   const { role, meetingId, status, allowDelegations } = useMeeting();
   const { user } = useAuth();
   const colors = useThemeColors();
@@ -80,9 +82,9 @@ export default function MemberMeetingLayout() {
         name="index"
         options={{
           title:
-            status === "scheduled" || status === "draft" ? "Reunión" : "Urnas",
+            status === "scheduled" || status === "draft" ? t("meeting.member.tabs.meeting") : t("meeting.member.tabs.urns"),
           tabBarLabel:
-            status === "scheduled" || status === "draft" ? "Reunión" : "Urnas",
+            status === "scheduled" || status === "draft" ? t("meeting.member.tabs.meeting") : t("meeting.member.tabs.urns"),
           tabBarIcon: ({ color, size }) =>
             status === "scheduled" || status === "draft" ? (
               <LayoutDashboard color={color} size={size} />
@@ -95,8 +97,8 @@ export default function MemberMeetingLayout() {
       <Tabs.Screen
         name="accreditation"
         options={{
-          title: "Acreditación",
-          tabBarLabel: "Acreditación",
+          title: t("meeting.member.tabs.accreditation"),
+          tabBarLabel: t("meeting.member.tabs.accreditation"),
           tabBarIcon: ({ color, size }) => <UserCheck color={color} size={size} />,
           href: tabs.accreditation
             ? `/meeting/${meetingId}/member/accreditation`
@@ -106,8 +108,8 @@ export default function MemberMeetingLayout() {
       <Tabs.Screen
         name="delegations"
         options={{
-          title: "Delegaciones",
-          tabBarLabel: "Delegaciones",
+          title: t("meeting.member.tabs.delegations"),
+          tabBarLabel: t("meeting.member.tabs.delegations"),
           tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
           href: tabs.delegations ? `/meeting/${meetingId}/member/delegations` : null,
         }}
@@ -115,8 +117,8 @@ export default function MemberMeetingLayout() {
       <Tabs.Screen
         name="results"
         options={{
-          title: "Resultados",
-          tabBarLabel: "Resultados",
+          title: t("meeting.member.tabs.results"),
+          tabBarLabel: t("meeting.member.tabs.results"),
           tabBarIcon: ({ color, size }) => <PieChart color={color} size={size} />,
           href: tabs.results ? `/meeting/${meetingId}/member/results` : null,
         }}

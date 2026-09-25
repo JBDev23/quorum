@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import { X } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { alert } from "@/components/Alert";
 
 interface CreateMeetingModalProps {
@@ -12,11 +13,12 @@ interface CreateMeetingModalProps {
 }
 
 export function CreateMeetingModal({ visible, onClose, onCreate, isCreating, groupName }: CreateMeetingModalProps) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
 
   const handleCreate = async () => {
     if (title.trim().length < 3) {
-      alert("Aviso", "El título debe tener al menos 3 caracteres.");
+      alert(t("common.warning"), t("components.createMeeting.error_length"));
       return;
     }
 
@@ -26,8 +28,8 @@ export function CreateMeetingModal({ visible, onClose, onCreate, isCreating, gro
       onClose();
     } catch (err) {
       alert(
-        "Error",
-        err instanceof Error ? err.message : "Error al crear la reunión"
+        t("common.error"),
+        err instanceof Error ? err.message : t("components.createMeeting.error_create")
       );
     }
   };
@@ -41,24 +43,23 @@ export function CreateMeetingModal({ visible, onClose, onCreate, isCreating, gro
         <View className="bg-card w-full max-w-sm border border-border rounded-3xl p-6 shadow-2xl">
           <View className="flex-row justify-between items-start mb-4">
             <View>
-              <Text className="text-foreground text-2xl font-bold">Nueva Reunión</Text>
+              <Text className="text-foreground text-2xl font-bold">{t("components.createMeeting.title")}</Text>
               <Text className="text-secondary-foreground text-sm font-semibold uppercase tracking-wider mt-1">{groupName}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} disabled={isCreating} className="p-2 bg-muted rounded-full">
+            <TouchableOpacity onPress={onClose} disabled={isCreating} className="p-2 bg-muted rounded-full" accessibilityRole="button" accessibilityLabel={t("common.close")}>
               <X color="#a3a3a3" size={20} />
             </TouchableOpacity>
           </View>
           
           <Text className="text-muted-foreground mb-6">
-            La reunión se creará en estado "Borrador". Podrás configurar la fecha,
-            las preguntas y el voto en blanco antes de programarla.
+            {t("components.createMeeting.desc")}
           </Text>
 
           <View className="mb-6">
-            <Text className="text-muted-foreground font-medium mb-2 ml-1">Título o Tema Principal</Text>
+            <Text className="text-muted-foreground font-medium mb-2 ml-1">{t("components.createMeeting.input_label")}</Text>
             <TextInput
               className="bg-background border border-border text-foreground text-lg rounded-xl px-4 py-4"
-              placeholder="Ej: Aprobación de presupuestos 2026"
+              placeholder={t("components.createMeeting.placeholder")}
               placeholderTextColor="#525252"
               autoCapitalize="sentences"
               maxLength={60}
@@ -79,7 +80,7 @@ export function CreateMeetingModal({ visible, onClose, onCreate, isCreating, gro
             {isCreating ? (
               <ActivityIndicator color="white" size="small" />
             ) : (
-              <Text className="text-primary-foreground font-bold text-lg">Crear y Configurar</Text>
+              <Text className="text-primary-foreground font-bold text-lg">{t("components.createMeeting.create")}</Text>
             )}
           </TouchableOpacity>
         </View>

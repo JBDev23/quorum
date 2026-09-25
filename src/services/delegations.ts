@@ -1,11 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import type { DelegateCandidate } from "@/services/groups";
+import i18n from "@/lib/i18n";
 
 function mapUserRow(user: any): DelegateCandidate | null {
   if (!user?.id) return null;
   return {
     id: user.id,
-    first_name: user.first_name || "Desconocido",
+    first_name: user.first_name || i18n.t("services.groups.unknown_user"),
     last_name: user.last_name || "",
     avatar_url: user.avatar_url || null,
   };
@@ -17,7 +18,7 @@ export async function fetchMyDelegation(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("No autenticado.");
+  if (!user) throw new Error(i18n.t("services.delegations.unauthenticated"));
 
   const { data, error } = await supabase
     .from("meeting_delegations")
@@ -36,7 +37,7 @@ export async function fetchMyDelegation(
     .eq("delegator_id", user.id)
     .maybeSingle();
 
-  if (error) throw new Error("No se pudo cargar tu delegación.");
+  if (error) throw new Error(i18n.t("services.delegations.load_my_delegation_error"));
 
   if (!data) return null;
 
@@ -52,7 +53,7 @@ export async function fetchDelegationsToMe(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("No autenticado.");
+  if (!user) throw new Error(i18n.t("services.delegations.unauthenticated"));
 
   const { data, error } = await supabase
     .from("meeting_delegations")
@@ -70,7 +71,7 @@ export async function fetchDelegationsToMe(
     .eq("meeting_id", meetingId)
     .eq("delegate_id", user.id);
 
-  if (error) throw new Error("No se pudieron cargar las delegaciones recibidas.");
+  if (error) throw new Error(i18n.t("services.delegations.load_received_error"));
 
   const candidates: DelegateCandidate[] = (data || [])
     .map((row: any) => {
@@ -110,34 +111,34 @@ export async function revokeDelegation(meetingId: string): Promise<void> {
 function mapDelegationError(message: string | undefined): string {
   const msg = message || "";
   if (msg.includes("ERR_ORGANIZER_CANNOT_DELEGATE")) {
-    return "Los organizadores no pueden delegar su voto.";
+    return i18n.t("services.delegations.organizer_cannot_delegate");
   }
   if (msg.includes("ERR_ALREADY_DELEGATED")) {
-    return "Ya tienes una delegación. Revócala antes de crear otra.";
+    return i18n.t("services.delegations.already_delegated");
   }
   if (msg.includes("ERR_REVOKE_LOCKED")) {
-    return "No se puede revocar la delegación mientras la reunión está en curso.";
+    return i18n.t("services.delegations.revoke_locked");
   }
   if (msg.includes("ERR_DELEGATIONS_DISABLED")) {
-    return "Las delegaciones no están activadas en esta reunión.";
+    return i18n.t("services.delegations.delegations_disabled");
   }
   if (msg.includes("ERR_MEETING_CLOSED")) {
-    return "La reunión está cerrada.";
+    return i18n.t("services.delegations.meeting_closed");
   }
   if (msg.includes("ERR_SELF_DELEGATION")) {
-    return "No puedes delegar en ti mismo.";
+    return i18n.t("services.delegations.self_delegation");
   }
   if (msg.includes("ERR_DELEGATE_NOT_MEMBER") || msg.includes("ERR_NOT_MEMBER")) {
-    return "El delegado no es miembro de este grupo.";
+    return i18n.t("services.delegations.not_member");
   }
   if (msg.includes("ERR_NOT_AUTHENTICATED")) {
-    return "Sesión expirada. Vuelve a iniciar sesión.";
+    return i18n.t("services.delegations.session_expired");
   }
   if (msg.includes("ERR_NOT_FOUND")) {
-    return "Reunión no encontrada.";
+    return i18n.t("services.delegations.not_found");
   }
   if (msg.includes("ERR_DELEGATE_REQUIRED")) {
-    return "Selecciona a quién delegar.";
+    return i18n.t("services.delegations.delegate_required");
   }
-  return "No se pudo completar la operación.";
+  return i18n.t("services.delegations.operation_error");
 }

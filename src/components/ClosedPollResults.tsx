@@ -2,12 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { getPollResults, type Poll } from "@/services/polls";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useTranslation } from "react-i18next";
 
 interface ClosedPollResultsProps {
   poll: Poll;
 }
 
 export function ClosedPollResults({ poll }: ClosedPollResultsProps) {
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const [results, setResults] = useState<Record<string, number>>({});
   const [blankVotes, setBlankVotes] = useState(0);
@@ -29,7 +31,7 @@ export function ClosedPollResults({ poll }: ClosedPollResultsProps) {
         setError(
           err instanceof Error
             ? err.message
-            : "No se pudieron cargar los resultados"
+            : t("voting.screen.error_load")
         );
       })
       .finally(() => setLoading(false));
@@ -54,7 +56,7 @@ export function ClosedPollResults({ poll }: ClosedPollResultsProps) {
           className="bg-muted py-2 rounded-lg"
         >
           <Text className="text-foreground text-center font-semibold text-sm">
-            Reintentar
+            {t("voting.hardcoded.retry")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -69,16 +71,16 @@ export function ClosedPollResults({ poll }: ClosedPollResultsProps) {
     <View className="bg-background p-4 rounded-xl border border-border mb-4 mt-2">
       <View className="flex-row justify-between items-end mb-4">
         <Text className="text-muted-foreground font-bold text-xs uppercase tracking-widest">
-          Escrutinio Final
+          {t("voting.hardcoded.final_scrutiny")}
         </Text>
         <Text className="text-foreground text-sm font-semibold">
-          {total} votos emitidos
+          {total} {t("voting.hardcoded.cast_votes")}
         </Text>
       </View>
 
       {total === 0 ? (
         <Text className="text-muted-foreground text-sm text-center py-2">
-          Nadie emitió voto en esta urna.
+          {t("voting.hardcoded.no_votes_ballot")}
         </Text>
       ) : (
         <View className="gap-4">
@@ -108,7 +110,7 @@ export function ClosedPollResults({ poll }: ClosedPollResultsProps) {
             <View>
               <View className="flex-row justify-between mb-1.5">
                 <Text className="text-muted-foreground font-medium">
-                  En blanco
+                  {t("voting.hardcoded.blank")}
                 </Text>
                 <Text className="text-muted-foreground font-bold">
                   {blankVotes} ({Math.round((blankVotes / total) * 100)}%)
